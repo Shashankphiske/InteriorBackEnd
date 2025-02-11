@@ -104,7 +104,7 @@ const updateProjectValues = async (req, res) => {
     if(!projectName){
         return res.status(400).json({
             success : false,
-            message : "RowIndex needed to update values",
+            message : "Project name needed to update values",
         });
     }
 

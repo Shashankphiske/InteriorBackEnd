@@ -11,6 +11,9 @@ const { sendProjectData, getProjectData, updateProjectValues, deleteProjectData 
 const { sendCustomerData, deleteCustomerData, getCustomerData } = require("./controllers/sheets/customersheets");
 const { sendInteriorData, getInteriorData, deleteInteriorData } = require("./controllers/sheets/interiorsheets");
 const { sendSalesAssociateData, getSalesAssociateData, deleteSalesAssociateData } = require("./controllers/sheets/salesAssociatesheets");
+const { addDataToArea, removeDataFromArea } = require("./controllers/sheets/Area Sheets/areasheets");
+const { addNewProduct, deleteSingleProduct, updateSingleProduct, getSingleProducts } = require("./controllers/sheets/Product Sheets/productsheets");
+const { addProductGroup } = require("./controllers/sheets/Product Sheets/productgroupsheets");
 
 const corsOptions = {
     origin : "http://localhost:5174",
@@ -49,6 +52,20 @@ app.post("/deleteinteriordata", deleteInteriorData);
 app.post("/sendsalesassociatedata", sendSalesAssociateData);
 app.get("/getsalesassociatedata", getSalesAssociateData);
 app.post("/deletesalesassociatedata", deleteSalesAssociateData);
+
+//area data routes
+app.post("/addareadata", addDataToArea);
+app.post("/removedatafromarea", removeDataFromArea);
+
+//product routes
+app.post("/addnewproduct", addNewProduct);
+app.post("/deletesingleproduct", deleteSingleProduct);
+app.post("/updatesingleproduct", updateSingleProduct);
+app.get("/getsingleproducts", getSingleProducts);
+
+//productgroup routes
+app.post("/addproductgroup", addProductGroup);
+
 
 app.listen(process.env.PORT, () => {
     console.log(`Server listening on port : ${process.env.PORT}`);
