@@ -11,9 +11,13 @@ const { sendProjectData, getProjectData, updateProjectValues, deleteProjectData 
 const { sendCustomerData, deleteCustomerData, getCustomerData } = require("./controllers/sheets/customersheets");
 const { sendInteriorData, getInteriorData, deleteInteriorData } = require("./controllers/sheets/interiorsheets");
 const { sendSalesAssociateData, getSalesAssociateData, deleteSalesAssociateData } = require("./controllers/sheets/salesAssociatesheets");
-const { addDataToArea, removeDataFromArea } = require("./controllers/sheets/Area Sheets/areasheets");
+const { addDataToArea, removeDataFromArea, getDataFromArea, updateDataOfArea } = require("./controllers/sheets/Area Sheets/areasheets");
 const { addNewProduct, deleteSingleProduct, updateSingleProduct, getSingleProducts } = require("./controllers/sheets/Product Sheets/productsheets");
-const { addProductGroup } = require("./controllers/sheets/Product Sheets/productgroupsheets");
+const { addProductGroup, deleteProductGroup, updateProductGroup, getAllProductGroups } = require("./controllers/sheets/Product Sheets/productgroupsheets");
+const { getAllStores, addStore, deleteStore, updateStores } = require("./controllers/sheets/stores/storesheet");
+const { getAllTailors, addTailor, deleteTailor, updateTailor } = require("./controllers/sheets/Tailor Sheets/tailorsheet");
+const { getBrands, addBrand, deleteBrand, updateBrand } = require("./controllers/sheets/Brand Sheets/brandsheets");
+const { getCatalogues, addCatalogue, deleteCatalogue, updateCatalogue } = require("./controllers/sheets/Catalogue Sheets/cataloguesheets");
 
 const corsOptions = {
     origin : "http://localhost:5174",
@@ -56,6 +60,8 @@ app.post("/deletesalesassociatedata", deleteSalesAssociateData);
 //area data routes
 app.post("/addareadata", addDataToArea);
 app.post("/removedatafromarea", removeDataFromArea);
+app.post("/getdatafromarea", getDataFromArea);
+app.post("/updatedataofarea", updateDataOfArea);
 
 //product routes
 app.post("/addnewproduct", addNewProduct);
@@ -65,7 +71,33 @@ app.get("/getsingleproducts", getSingleProducts);
 
 //productgroup routes
 app.post("/addproductgroup", addProductGroup);
+app.post("/deleteproductgroup", deleteProductGroup);
+app.post("/updateproductgroup", updateProductGroup);
+app.get("/getallproductgroup", getAllProductGroups);
 
+//store database routes
+app.get("/getallstores", getAllStores);
+app.post("/addstore", addStore);
+app.post("/deletestore", deleteStore);
+app.post("/updatestore", updateStores);
+
+//tailors database routes
+app.get("/gettailors", getAllTailors);
+app.post("/addtailor", addTailor);
+app.post("/deletetailor", deleteTailor);
+app.post("/updatetailor", updateTailor);
+
+// brand routes
+app.get("/getbrands", getBrands);
+app.post("/addbrand", addBrand);
+app.post("/deletebrand", deleteBrand);
+app.post("/updatebrand", updateBrand);
+
+// catalogue routes
+app.get("/getcatalogues", getCatalogues);
+app.post("/addcatalogue", addCatalogue);
+app.post("/deletecatalogue", deleteCatalogue);
+app.post("/updatecatalogue", updateCatalogue);
 
 app.listen(process.env.PORT, () => {
     console.log(`Server listening on port : ${process.env.PORT}`);

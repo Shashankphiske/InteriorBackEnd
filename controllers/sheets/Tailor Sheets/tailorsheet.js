@@ -1,76 +1,74 @@
 const { google } = require("googleapis");
 require("dotenv").config();
 
-const credentials = require("../../../credentials.json");
 const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
-const auth  = new google.auth.JWT(
+const credentials = require("../../../credentials.json");
+const range = "Tailors!A:D";
+
+const sheetId = process.env.tailorsheetid;
+
+const auth = new google.auth.JWT(
     credentials.client_email,
     null,
     credentials.private_key,
     scopes,
 );
 
-const sheetId = process.env.productsheetid;
+const sheets = google.sheets({version : "v4", auth});
 
-const sheets = google.sheets({ version : "v4", auth });
+const addTailor = async (req, res) => {
+    const { tailorName, phoneNumber, email, address } = req.body;
 
-const range = "ProductGroup!A:E";
-
-const addProductGroup = async (req, res) => {
-    const { groupName, mainProducts, addonProducts, color, needsTailoring } = req.body;
-
-    if(!groupName || !mainProducts || !addonProducts || !color || !needsTailoring){
+    if(!tailorName || !phoneNumber || !email || !address){
         return res.status(400).json({
             success : false,
             message : "All fields are required",
         });
     }
 
-    const response = await sheets.spreadsheets.values.append({
+    await sheets.spreadsheets.values.append({
         spreadsheetId : sheetId,
         range : range,
-        valueInputOption : "RAW",
         insertDataOption : "INSERT_ROWS",
+        valueInputOption : "RAW",
         requestBody : {
-            values : [[ groupName, mainProducts, addonProducts, color, needsTailoring ]],
+            values : [[ tailorName, phoneNumber, email, address ]],
         }
     });
 
     return res.status(200).json({
         success : true,
-        message : "Product group added",
+        message : "New tailor added",
     });
 }
 
-const deleteProductGroup = async (req, res) => {
-    const { groupName } = req.body;
+const deleteTailor = async (req, res) => {
+    const { tailorName } = req.body;
 
-    if(!groupName){
+    if(!tailorName){
         return res.status(400).json({
             success : false,
-            message : "Group name is required",
+            message : "Tailor name is required",
         });
     }
 
     const response = await sheets.spreadsheets.values.get({
-        auth,
         spreadsheetId : sheetId,
         range : range,
     });
 
     const rows = response.data.values;
-
     if(rows == undefined){
         return res.status(400).json({
             success : false,
-            message : "No data in the backend of productgroup"
+            message : "No data available in Tailors database",
         });
     }
 
     let index = -1;
 
-    for(let i = 0 ; i < rows.length; i++){
-        if(rows[i][0] == groupName){
+    for(let i = 0; i < rows.length; i++){
+        if(rows[i][0] == tailorName){
             index = i;
             break;
         }
@@ -79,7 +77,7 @@ const deleteProductGroup = async (req, res) => {
     if(index == -1){
         return res.status(400).json({
             success : false,
-            message : `No product group with the name ${groupName} found`,
+            message : `No tailor with the name : ${tailorName} found`,
         });
     }
 
@@ -103,17 +101,30 @@ const deleteProductGroup = async (req, res) => {
 
     return res.status(200).json({
         success : true,
-        message : "Data deleted from product group",
+        message : "Tailor deleted",
     });
 }
 
-const updateProductGroup = async (req, res) => {
-    const { groupName, mainProducts, addonProducts, color, needsTailoring } = req.body;
+const getAllTailors = async (req, res) => {
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId : sheetId,
+        range : range,
+    });
 
-    if(!groupName){
+    return res.status(200).json({
+        success : true,
+        message : "Data fetched from tailors database",
+        body : response.data.values,
+    });
+}
+
+const updateTailor = async (req, res) => {
+    const { tailorName, phoneNumber, email, address } = req.body;
+
+    if(!tailorName){
         return res.status(400).json({
             success : false,
-            message : "Group name required",
+            message : "Tailor name is required",
         });
     }
 
@@ -127,7 +138,7 @@ const updateProductGroup = async (req, res) => {
     if(rows == undefined){
         return res.status(400).json({
             success : false,
-            message : "No data available in the database",
+            message : "No data found in the tailors database",
         });
     }
 
@@ -135,7 +146,7 @@ const updateProductGroup = async (req, res) => {
     let row = -1;
 
     for(let i = 0; i < rows.length; i++){
-        if(rows[i][0] == groupName){
+        if(rows[i][0] == tailorName){
             index = i + 1;
             row = rows[i];
             break;
@@ -145,23 +156,20 @@ const updateProductGroup = async (req, res) => {
     if(index == -1){
         return res.status(400).json({
             success : false,
-            message : `No product group with the name ${groupName} found`,
-        })
+            message : `No tailor with the name : ${tailorName} found`,
+        });
     }
 
     const newrow = [
-        groupName,
-        mainProducts ?? row[1],
-        addonProducts ?? row[2],
-        color ?? row[3],
-        needsTailoring ?? row[4],
+        tailorName,
+        phoneNumber ?? row[1],
+        email ?? row[2],
+        address ?? row[3],
     ];
-
-    const newrange = `ProductGroup!A${index}:E${index}`;
 
     await sheets.spreadsheets.values.update({
         spreadsheetId : sheetId,
-        range : newrange,
+        range : `Tailors!A${index}:D${index}`,
         valueInputOption : "RAW",
         resource : {
             values : [newrow],
@@ -170,22 +178,8 @@ const updateProductGroup = async (req, res) => {
 
     return res.status(200).json({
         success : true,
-        message : "Product group updated",
+        message : "Tailor data updated",
     });
 }
 
-const getAllProductGroups = async (req, res) => {
-    const response = await sheets.spreadsheets.values.get({
-        spreadsheetId : sheetId,
-        range : range,
-    });
-
-    return res.status(200).json({
-        success : true,
-        message : "Data fetched",
-        body : response.data.values,
-    });
-}
-
-
-module.exports = { addProductGroup, deleteProductGroup, updateProductGroup, getAllProductGroups };
+module.exports = { addTailor, deleteTailor, getAllTailors, updateTailor };

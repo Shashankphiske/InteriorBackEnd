@@ -1,61 +1,60 @@
 const { google } = require("googleapis");
 require("dotenv").config();
 
-const credentials = require("../../../credentials.json");
 const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
-const auth  = new google.auth.JWT(
+const credentials = require("../../../credentials.json");
+const range = "Brands!A:B";
+
+const auth = new google.auth.JWT(
     credentials.client_email,
     null,
     credentials.private_key,
-    scopes,
+    scopes
 );
 
-const sheetId = process.env.productsheetid;
+const sheetId = process.env.brandsheetid;
 
 const sheets = google.sheets({ version : "v4", auth });
 
-const range = "ProductGroup!A:E";
+const addBrand = async (req, res) => {
+    const { brandName, description } = req.body;
 
-const addProductGroup = async (req, res) => {
-    const { groupName, mainProducts, addonProducts, color, needsTailoring } = req.body;
-
-    if(!groupName || !mainProducts || !addonProducts || !color || !needsTailoring){
+    if(!brandName || !description){
         return res.status(400).json({
             success : false,
             message : "All fields are required",
         });
     }
 
-    const response = await sheets.spreadsheets.values.append({
+    await sheets.spreadsheets.values.append({
         spreadsheetId : sheetId,
-        range : range,
-        valueInputOption : "RAW",
+        range,
         insertDataOption : "INSERT_ROWS",
+        valueInputOption : "RAW",
         requestBody : {
-            values : [[ groupName, mainProducts, addonProducts, color, needsTailoring ]],
+            values : [[brandName, description]],
         }
     });
 
     return res.status(200).json({
         success : true,
-        message : "Product group added",
+        message : "Brand added",
     });
 }
 
-const deleteProductGroup = async (req, res) => {
-    const { groupName } = req.body;
+const deleteBrand = async (req, res) => {
+    const { brandName } = req.body;
 
-    if(!groupName){
+    if(!brandName){
         return res.status(400).json({
             success : false,
-            message : "Group name is required",
+            message : "Brand name is required",
         });
     }
 
     const response = await sheets.spreadsheets.values.get({
-        auth,
         spreadsheetId : sheetId,
-        range : range,
+        range,
     });
 
     const rows = response.data.values;
@@ -63,14 +62,13 @@ const deleteProductGroup = async (req, res) => {
     if(rows == undefined){
         return res.status(400).json({
             success : false,
-            message : "No data in the backend of productgroup"
+            message : "No data available in brands database",
         });
     }
 
     let index = -1;
-
-    for(let i = 0 ; i < rows.length; i++){
-        if(rows[i][0] == groupName){
+    for(let i = 0; i < rows.length; i++){
+        if(rows[i][0] == brandName){
             index = i;
             break;
         }
@@ -79,7 +77,7 @@ const deleteProductGroup = async (req, res) => {
     if(index == -1){
         return res.status(400).json({
             success : false,
-            message : `No product group with the name ${groupName} found`,
+            message : `No brand with the name : ${brandName} found`,
         });
     }
 
@@ -101,25 +99,38 @@ const deleteProductGroup = async (req, res) => {
         }
     });
 
-    return res.status(200).json({
+    res.status(200).json({
         success : true,
-        message : "Data deleted from product group",
+        message : `${brandName} deleted`,
     });
 }
 
-const updateProductGroup = async (req, res) => {
-    const { groupName, mainProducts, addonProducts, color, needsTailoring } = req.body;
+const getBrands = async (req, res) => {
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId : sheetId,
+        range,
+    });
 
-    if(!groupName){
+    res.status(200).json({
+        success : true,
+        message : "Data fetched from Brands database",
+        body : response.data.values,
+    });
+}
+
+const updateBrand = async (req, res) => {
+    const { brandName, description } = req.body;
+
+    if(!brandName){
         return res.status(400).json({
             success : false,
-            message : "Group name required",
+            message : "Brand name is required",
         });
     }
 
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId : sheetId,
-        range : range,
+        range,
     });
 
     const rows = response.data.values;
@@ -127,15 +138,14 @@ const updateProductGroup = async (req, res) => {
     if(rows == undefined){
         return res.status(400).json({
             success : false,
-            message : "No data available in the database",
+            message : "no data found in brand database",
         });
     }
 
-    let index = -1;
     let row = -1;
-
+    let index = -1;
     for(let i = 0; i < rows.length; i++){
-        if(rows[i][0] == groupName){
+        if(rows[i][0] == brandName){
             index = i + 1;
             row = rows[i];
             break;
@@ -145,23 +155,18 @@ const updateProductGroup = async (req, res) => {
     if(index == -1){
         return res.status(400).json({
             success : false,
-            message : `No product group with the name ${groupName} found`,
-        })
+            message : `No brand with the name ${brandName} found`,
+        });
     }
 
     const newrow = [
-        groupName,
-        mainProducts ?? row[1],
-        addonProducts ?? row[2],
-        color ?? row[3],
-        needsTailoring ?? row[4],
+        brandName,
+        description ?? row[1],
     ];
-
-    const newrange = `ProductGroup!A${index}:E${index}`;
 
     await sheets.spreadsheets.values.update({
         spreadsheetId : sheetId,
-        range : newrange,
+        range : `Brands!A${index}:B${index}`,
         valueInputOption : "RAW",
         resource : {
             values : [newrow],
@@ -170,22 +175,8 @@ const updateProductGroup = async (req, res) => {
 
     return res.status(200).json({
         success : true,
-        message : "Product group updated",
+        message : `Update ${brandName}`,
     });
 }
 
-const getAllProductGroups = async (req, res) => {
-    const response = await sheets.spreadsheets.values.get({
-        spreadsheetId : sheetId,
-        range : range,
-    });
-
-    return res.status(200).json({
-        success : true,
-        message : "Data fetched",
-        body : response.data.values,
-    });
-}
-
-
-module.exports = { addProductGroup, deleteProductGroup, updateProductGroup, getAllProductGroups };
+module.exports = { addBrand, deleteBrand, getBrands, updateBrand }
