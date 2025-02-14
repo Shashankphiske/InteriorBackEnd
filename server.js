@@ -18,6 +18,7 @@ const { getAllStores, addStore, deleteStore, updateStores } = require("./control
 const { getAllTailors, addTailor, deleteTailor, updateTailor } = require("./controllers/sheets/Tailor Sheets/tailorsheet");
 const { getBrands, addBrand, deleteBrand, updateBrand } = require("./controllers/sheets/Brand Sheets/brandsheets");
 const { getCatalogues, addCatalogue, deleteCatalogue, updateCatalogue } = require("./controllers/sheets/Catalogue Sheets/cataloguesheets");
+const { getTasks, addTask, updateTask, deleteTask } = require("./controllers/sheets/Task Sheets/tasksheet");
 
 const corsOptions = {
     origin : "http://localhost:5174",
@@ -98,6 +99,12 @@ app.get("/getcatalogues", getCatalogues);
 app.post("/addcatalogue", addCatalogue);
 app.post("/deletecatalogue", deleteCatalogue);
 app.post("/updatecatalogue", updateCatalogue);
+
+// tasks routes
+app.get("/gettasks", getTasks);
+app.post("/addtask", addTask);
+app.post("/updatetask", updateTask);
+app.post("/deletetask", deleteTask);
 
 app.listen(process.env.PORT, () => {
     console.log(`Server listening on port : ${process.env.PORT}`);
