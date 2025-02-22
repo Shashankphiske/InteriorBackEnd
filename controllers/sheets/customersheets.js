@@ -14,7 +14,7 @@ const auth = new google.auth.JWT(
 
 const sheets = google.sheets({version : "v4", auth});
 
-const range = "Sheet1!A:D";
+const range = "CustomerData!A:D";
 
 const getCustomerSerial = async () => {
     const response = await sheets.spreadsheets.values.get({
@@ -139,4 +139,18 @@ const getCustomerData = async (req, res) => {
     })
 }
 
-module.exports = { sendCustomerData, deleteCustomerData, getCustomerData };
+const CustomerData = async () => {
+    const response = await sheets.spreadsheets.values.get({
+        auth,
+        spreadsheetId : sheetId,
+        range
+    });
+
+    if(!response.data.values){
+        return null;
+    }
+
+    return response.data.values;
+}
+
+module.exports = { sendCustomerData, deleteCustomerData, getCustomerData, getCustomerSerial, CustomerData };

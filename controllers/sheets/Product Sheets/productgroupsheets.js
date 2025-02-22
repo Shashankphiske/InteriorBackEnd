@@ -2,6 +2,7 @@ const { google } = require("googleapis");
 require("dotenv").config();
 
 const credentials = require("../../../credentials.json");
+const { getAllProducts } = require("./productsheets");
 const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
 const auth  = new google.auth.JWT(
     credentials.client_email,
@@ -187,5 +188,28 @@ const getAllProductGroups = async (req, res) => {
     });
 }
 
+const AllProductGroups = async () => {
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId : sheetId,
+        range : range,
+    });
 
-module.exports = { addProductGroup, deleteProductGroup, updateProductGroup, getAllProductGroups };
+    let rows = response.data.values;
+
+    const productRows = await getAllProducts();
+
+    rows.forEach(row => {
+        productRows.forEach(product => {
+            if(row[1] == product[0]){
+                row[1] = product;
+            }
+            if(row[2] == product[0]){
+                row[2] = product;
+            }
+        });
+    });
+
+    return rows;
+}
+
+module.exports = { addProductGroup, deleteProductGroup, updateProductGroup, getAllProductGroups, AllProductGroups };

@@ -14,7 +14,7 @@ const auth = new google.auth.JWT(
 
 const sheets = google.sheets({ version : "v4", auth });
 
-const range = "Sheet1!A:D";
+const range = "InteriorData!A:D";
 
 const sendInteriorData = async (req, res) => {
     const { name, email, phonenumber, address } = req.body;
@@ -55,6 +55,17 @@ const getInteriorData = async (req, res) => {
         message : "Data fetched successfully",
         body : rows,
     })
+}
+
+const InteriorData = async () => {
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId : sheetId,
+        range,
+    });
+
+    const rows = response.data.values;
+
+    return rows;
 }
 
 const deleteInteriorData = async (req, res) => {
@@ -121,4 +132,4 @@ const deleteInteriorData = async (req, res) => {
     })
 }
 
-module.exports = { sendInteriorData, getInteriorData, deleteInteriorData }
+module.exports = { sendInteriorData, getInteriorData, deleteInteriorData, InteriorData }

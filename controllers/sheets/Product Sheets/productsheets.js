@@ -183,4 +183,15 @@ const getSingleProducts = async (req, res) => {
     });
 }
 
-module.exports = { addNewProduct, deleteSingleProduct, updateSingleProduct, getSingleProducts };
+const getAllProducts = async () => {
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId : sheetId,
+        range : range,
+    });
+
+    const rows = response.data.values;
+
+    return rows;
+}
+
+module.exports = { addNewProduct, deleteSingleProduct, updateSingleProduct, getSingleProducts, getAllProducts };

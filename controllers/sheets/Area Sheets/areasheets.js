@@ -1,9 +1,11 @@
 const { google } = require("googleapis");
 require("dotenv").config();
 const fs = require("fs");
-const { addAreaMap, deleteAreaMap, getAreaMap } = require("./areamap");
+const { addAreaMap, deleteAreaMap, getAreaMap, getAllAreaMap } = require("./areamap");
 
 const credentials = require("../../../credentials.json");
+const { getAllProductGroups, AllProductGroups } = require("../Product Sheets/productgroupsheets");
+const { group } = require("console");
 
 const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
 const sheetId = process.env.allareaspreadsheetid;
@@ -168,6 +170,17 @@ const getDataFromArea = async (req, res) => {
 
         const rows = response.data.values;
 
+        const productGroupData = await AllProductGroups();
+
+        rows.forEach(row => {
+            productGroupData.forEach(productGroup => {
+                if(row[2] == productGroup[0]){
+                    row[2] = productGroup;
+                    return;
+                }
+            })
+        })
+
         return res.status(200).json({
             success : true,
             message :  `Data fetched from ${areaName} successfully`,
@@ -261,4 +274,37 @@ const updateDataOfArea = async (req, res) => {
 
 }
 
-module.exports = { addDataToArea, removeDataFromArea, getDataFromArea, updateDataOfArea };
+const AllAreaData = async () => {
+
+    const areaMapData = await getAllAreaMap();
+
+    const ProductGroupData = await AllProductGroups();
+
+    let masterRows = [];
+
+    for(let i = 0; i < areaMapData.length; i++){
+        let newrange = range.replace("{areaName}", areaMapData[i][0]);
+
+        const response = await sheets.spreadsheets.values.get({
+            spreadsheetId : sheetId,
+            range : newrange,
+        });
+
+        if(response.data.values != null){
+            masterRows.push(...response.data.values);
+        }
+    }
+
+    masterRows.forEach(row => {
+        ProductGroupData.forEach(group => {
+            if(row[1] == group[0]){
+                row[1] = group;
+            }
+        });
+    })
+
+    return masterRows;
+
+}
+
+module.exports = { addDataToArea, removeDataFromArea, getDataFromArea, updateDataOfArea, AllAreaData };

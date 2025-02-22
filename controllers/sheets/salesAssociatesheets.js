@@ -10,7 +10,7 @@ const auth = new google.auth.JWT(
     scopes,
 );
 const sheetId = process.env.salesAssociateSheetId;
-const range = "Sheet1!A:D";
+const range = "SalesAssociateData!A:D";
 
 const sheets = google.sheets({version : "v4", auth});
 
@@ -51,6 +51,16 @@ const getSalesAssociateData = async (req, res) => {
         message : "Associate data fetched successfully",
         body : response.data.values,
     });
+
+}
+
+const SalesAssociateData = async () => {
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId : sheetId,
+        range,
+    });
+
+    return response.data.values;
 
 }
 
@@ -116,4 +126,4 @@ const deleteSalesAssociateData = async (req, res) => {
     });
 }
 
-module.exports = { sendSalesAssociateData, getSalesAssociateData, deleteSalesAssociateData };
+module.exports = { sendSalesAssociateData, getSalesAssociateData, deleteSalesAssociateData, SalesAssociateData };

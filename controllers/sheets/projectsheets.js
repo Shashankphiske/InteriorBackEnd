@@ -4,6 +4,10 @@ require("dotenv").config()
 const sheetId = process.env.SHEET_ID;
 const scopes = ["https://www.googleapis.com/auth/spreadsheets"]; // defines permission, here access to google sheets
 const credentials = require("../../credentials.json");
+const { getCustomerSerial, getCustomerData, CustomerData } = require("./customersheets");
+const { InteriorData } = require("./interiorsheets");
+const { SalesAssociateData } = require("./salesAssociatesheets");
+const { AllAreaData } = require("./Area Sheets/areasheets");
 
 const auth = new google.auth.JWT( // json web token for authentication
     credentials.client_email,
@@ -11,23 +15,12 @@ const auth = new google.auth.JWT( // json web token for authentication
     credentials.private_key,
     scopes
 );
-
 const sheets = google.sheets({ version : "v4", auth }); // instance of sheets api
 
-async function getLastSrNo() {
-    const response = await sheets.spreadsheets.values.get({
-        auth,
-        spreadsheetId: sheetId,
-        range: "Sheet1!A:O"  // Column A (Sr No.)
-    });
-
-    const rows = response.data.values;
-    if (!rows || rows.length === 0) {
-        return 0; // No data, start from 1
-    }
-
-    return rows.length; // Get last Sr No.
-}
+const customerSheetId=process.env.customerSheetId;
+const interiorSheetId=process.env.interiorSheetId;
+const salesAssociateSheetId=process.env.salesAssociateSheetId;
+const allareaspreadsheetid=process.env.allareaspreadsheetid;
 
 const sendProjectData = async (req, res) => {
     const { projectName, customerLink , projectReference, address, status, amount, received, due, createdBy, interiorPersonLink, salesAssociateLink, allAreaLink, quotationLink } = req.body;
@@ -44,7 +37,7 @@ const sendProjectData = async (req, res) => {
     try{
         await sheets.spreadsheets.values.append({
             spreadsheetId : sheetId,
-            range : "Sheet1!A:N",
+            range : "AllProjects!A:N",
             valueInputOption : "RAW",
             insertDataOption : "INSERT_ROWS",
             requestBody : {
@@ -66,11 +59,41 @@ const sendProjectData = async (req, res) => {
     }
 }
 
+const addValues = async (rows, customerRows, interiorRows, SalesAssociateRows, allAreaRows) => {
+    rows.forEach(row => {
+        customerRows.forEach(customer => {
+            if(customer[1] == row[1]){
+                row[1] = customer;
+                return;
+            }
+        });
+        interiorRows.forEach(interior => {
+            if(row[9] == interior[0]){
+                row[9] = interior;
+                return;
+            }
+        });
+        SalesAssociateRows.forEach(associate => {
+            if(row[10] == associate[0]){
+                row[10] = associate;
+                return;
+            }
+        });
+        allAreaRows.forEach(areaRow => {
+            if(row[11] == areaRow[0]){
+                row[11] = areaRow;
+            }
+        });
+    });
+
+    return rows;
+}
+
 const getProjectData = async (req, res) => {
     try{
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId : sheetId,
-            range : "Sheet1!A:N",
+            range : "AllProjects!A:N",
         });
 
         const rows = response.data.values;
@@ -83,10 +106,16 @@ const getProjectData = async (req, res) => {
             });
         }
 
+        const customerRows = await CustomerData();
+        const InteriorRows = await InteriorData();
+        const SalesAssociateRows = await SalesAssociateData();
+        const AllAreaRows = await AllAreaData();
+        const finalRows = await addValues(rows, customerRows, InteriorRows, SalesAssociateRows, AllAreaRows);
+
         return res.status(200).json({
             success : true,
             message : "Data sent",
-            body : rows,
+            body : finalRows,
         })
     }
     catch(error){
@@ -110,7 +139,7 @@ const updateProjectValues = async (req, res) => {
 
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId : sheetId,
-        range : "Sheet1!A:N",
+        range : "AllProjects!A:N",
     });
 
     const rows = response.data.values;
@@ -159,7 +188,7 @@ const updateProjectValues = async (req, res) => {
 
     await sheets.spreadsheets.values.update({
         spreadsheetId : sheetId,
-        range : `Sheet1!A${rowIndex}:N${rowIndex}`,
+        range : `AllProjects!A${rowIndex}:N${rowIndex}`,
         valueInputOption : "RAW",
         resource : { values : [updatedrow]},
     });
@@ -183,7 +212,7 @@ const deleteProjectData = async (req, res) => {
     let response = await sheets.spreadsheets.values.get({
         auth,
         spreadsheetId : sheetId,
-        range : "Sheet1!A:N",
+        range : "AllProjects!A:N",
     });
 
     const rows = response.data.values;
