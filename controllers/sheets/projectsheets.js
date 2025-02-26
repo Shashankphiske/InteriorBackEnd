@@ -1,259 +1,150 @@
 const { google } = require("googleapis");
-require("dotenv").config()
+require("dotenv").config();
 
-const sheetId = process.env.SHEET_ID;
-const scopes = ["https://www.googleapis.com/auth/spreadsheets"]; // defines permission, here access to google sheets
 const credentials = require("../../credentials.json");
-const { getCustomerSerial, getCustomerData, CustomerData } = require("./customersheets");
+const { CustomerData } = require("./customersheets");
 const { InteriorData } = require("./interiorsheets");
 const { SalesAssociateData } = require("./salesAssociatesheets");
 const { AllAreaData } = require("./Area Sheets/areasheets");
 
-const auth = new google.auth.JWT( // json web token for authentication
-    credentials.client_email,
-    null,
-    credentials.private_key,
-    scopes
-);
-const sheets = google.sheets({ version : "v4", auth }); // instance of sheets api
+const sheetId = process.env.SHEET_ID;
+const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
+const auth = new google.auth.JWT(credentials.client_email, null, credentials.private_key, scopes);
+const sheets = google.sheets({ version: "v4", auth });
 
-const customerSheetId=process.env.customerSheetId;
-const interiorSheetId=process.env.interiorSheetId;
-const salesAssociateSheetId=process.env.salesAssociateSheetId;
-const allareaspreadsheetid=process.env.allareaspreadsheetid;
+// Utility function to fetch all project data
+const getAllProjectData = async () => {
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: sheetId,
+        range: "AllProjects!A:N",
+    });
+    return response.data.values || [];
+};
 
+// Utility function to find row index by project name
+const findRowIndex = (rows, projectName) => {
+    return rows.findIndex(row => row[0] === projectName);
+};
+
+// Send Project Data (Insert)
 const sendProjectData = async (req, res) => {
-    const { projectName, customerLink , projectReference, address, status, amount, received, due, createdBy, interiorPersonLink, salesAssociateLink, allAreaLink, quotationLink } = req.body;
+    const { projectName, customerLink, projectReference, address, status, amount, received, due, createdBy, interiorPersonLink, salesAssociateLink, allAreaLink, quotationLink } = req.body;
 
-    if(!projectName || !customerLink || !projectReference || !address || !status || !received || !due || !createdBy || !interiorPersonLink || !salesAssociateLink || !allAreaLink || !quotationLink){
-        return res.status(400).json({
-            success : false,
-            message : "All fields are required",
-        })
+    if (![projectName, customerLink, projectReference, address, status, received, due, createdBy, interiorPersonLink, salesAssociateLink, allAreaLink, quotationLink].every(Boolean)) {
+        return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
     const date = new Date().toISOString().replace("T", " ").slice(0, 19);
 
-    try{
+    try {
         await sheets.spreadsheets.values.append({
-            spreadsheetId : sheetId,
-            range : "AllProjects!A:N",
-            valueInputOption : "RAW",
-            insertDataOption : "INSERT_ROWS",
-            requestBody : {
-                values : [[projectName, customerLink, projectReference, address, status, amount, received, due, createdBy, interiorPersonLink, salesAssociateLink, allAreaLink, quotationLink, date]],
-            }
+            spreadsheetId: sheetId,
+            range: "AllProjects!A:N",
+            valueInputOption: "RAW",
+            insertDataOption: "INSERT_ROWS",
+            requestBody: {
+                values: [[projectName, customerLink, projectReference, address, status, amount, received, due, createdBy, interiorPersonLink, salesAssociateLink, allAreaLink, quotationLink, date]],
+            },
         });
-    
-        return res.status(200).json({
-            success : true,
-            message : "Data send successfully",
-        })
+
+        return res.status(200).json({ success: true, message: "Data sent successfully" });
+    } catch (error) {
+        console.error("Error inserting project values:", error);
+        return res.status(500).json({ success: false, message: "Error inserting project data in sheets" });
     }
-    catch(error){
-        console.log("Error in inserting project values :",error);
-        return res.status(500).json({
-            success : false,
-            message : "Error in inserting project data in sheets",
-        })
-    }
-}
+};
 
-const addValues = async (rows, customerRows, interiorRows, SalesAssociateRows, allAreaRows) => {
-    rows.forEach(row => {
-        customerRows.forEach(customer => {
-            if(customer[1] == row[1]){
-                row[1] = customer;
-                return;
-            }
-        });
-        interiorRows.forEach(interior => {
-            if(row[9] == interior[0]){
-                row[9] = interior;
-                return;
-            }
-        });
-        SalesAssociateRows.forEach(associate => {
-            if(row[10] == associate[0]){
-                row[10] = associate;
-                return;
-            }
-        });
-        allAreaRows.forEach(areaRow => {
-            if(row[11] == areaRow[0]){
-                row[11] = areaRow;
-            }
-        });
-    });
+// Add customer, interior, sales associate, and area data to rows
+const addValues = async (rows) => {
+    const [customerRows, interiorRows, salesAssociateRows, allAreaRows] = await Promise.all([
+        CustomerData(),
+        InteriorData(),
+        SalesAssociateData(),
+        AllAreaData(),
+    ]);
 
-    return rows;
-}
+    return rows.map(row => [
+        row[0],
+        customerRows.find(c => c[1] === row[1]) || row[1],
+        row[2], row[3], row[4], row[5], row[6], row[7], row[8],
+        interiorRows.find(i => i[0] === row[9]) || row[9],
+        salesAssociateRows.find(s => s[0] === row[10]) || row[10],
+        allAreaRows.find(a => a[0] === row[11]) || row[11],
+        row[12], row[13]
+    ]);
+};
 
+// Get Project Data
 const getProjectData = async (req, res) => {
-    try{
-        const response = await sheets.spreadsheets.values.get({
-            spreadsheetId : sheetId,
-            range : "AllProjects!A:N",
-        });
+    try {
+        const rows = await getAllProjectData();
+        if (!rows.length) return res.status(400).json({ success: false, message: "No project data available" });
 
-        const rows = response.data.values;
-
-        if(!rows || rows.length == 0){
-            console.log("no data found");
-            return res.status(400).json({
-                success : false,
-                message : "No project data available",
-            });
-        }
-
-        const customerRows = await CustomerData();
-        const InteriorRows = await InteriorData();
-        const SalesAssociateRows = await SalesAssociateData();
-        const AllAreaRows = await AllAreaData();
-        const finalRows = await addValues(rows, customerRows, InteriorRows, SalesAssociateRows, AllAreaRows);
-
-        return res.status(200).json({
-            success : true,
-            message : "Data sent",
-            body : finalRows,
-        })
+        const finalRows = await addValues(rows);
+        return res.status(200).json({ success: true, message: "Data Fetched", body: finalRows });
+    } catch (error) {
+        console.error("Error retrieving project data:", error);
+        return res.status(500).json({ success: false, message: "Error retrieving data from sheets" });
     }
-    catch(error){
-        console.log("Error in retreiving project data from sheets :", error);
-        return res.status(500).json({
-            success : false,
-            message : "Error in getting data from sheets",
-        })
-    }
-}
+};
 
+// Update Project Values
 const updateProjectValues = async (req, res) => {
-    const { projectName, customerLink, projectReference, address, status, amount, received, due, createdBy, interiorPersonLink, salesAssociateLink, allAreaLink, quotationLink } = req.body;
+    const { projectName, ...updatedFields } = req.body;
+    if (!projectName) return res.status(400).json({ success: false, message: "Project name needed to update values" });
 
-    if(!projectName){
-        return res.status(400).json({
-            success : false,
-            message : "Project name needed to update values",
+    try {
+        const rows = await getAllProjectData();
+        const rowIndex = findRowIndex(rows, projectName);
+        if (rowIndex === -1) return res.status(400).json({ success: false, message: "Project not found" });
+
+        const updatedRow = rows[rowIndex].map((value, index) => updatedFields[Object.keys(updatedFields)[index]] ?? value);
+
+        await sheets.spreadsheets.values.update({
+            spreadsheetId: sheetId,
+            range: `AllProjects!A${rowIndex + 1}:N${rowIndex + 1}`,
+            valueInputOption: "RAW",
+            resource: { values: [updatedRow] },
         });
+
+        return res.status(200).json({ success: true, message: "Project updated successfully" });
+    } catch (error) {
+        console.error("Error updating project:", error);
+        return res.status(500).json({ success: false, message: "Error updating project data" });
     }
+};
 
-    const response = await sheets.spreadsheets.values.get({
-        spreadsheetId : sheetId,
-        range : "AllProjects!A:N",
-    });
-
-    const rows = response.data.values;
-
-    if(rows.length == 0){
-        return res.status(400).json({
-            success : false,
-            message : "no project data availabe",
-        })
-    }
-
-    let row = -1;
-    let rowIndex = -1;
-    for(let i = 0; i < rows.length ; i++){
-        if(rows[i][0] === projectName){
-            row = rows[i];
-            rowIndex = i + 1;
-            break;
-        }
-    }
-
-    if(!row || rowIndex == -1){
-        console.log("Row doesnt exist");
-        return res.status(400).json({
-            success : false,
-            message : "Specified project index doesnt exist"
-        });
-    }
-
-    const updatedrow = [
-        projectName ?? row[0],
-        customerLink ?? row[1],
-        projectReference ?? row[2],
-        address ?? row[3],
-        status ?? row[4],
-        amount ?? row[5],
-        received ?? row[6],
-        due ?? row[7],
-        createdBy ?? row[8],
-        interiorPersonLink ?? row[9],
-        salesAssociateLink ?? row[10],
-        allAreaLink ?? row[11],
-        quotationLink ?? row[12],
-        row[13]
-    ]
-
-    await sheets.spreadsheets.values.update({
-        spreadsheetId : sheetId,
-        range : `AllProjects!A${rowIndex}:N${rowIndex}`,
-        valueInputOption : "RAW",
-        resource : { values : [updatedrow]},
-    });
-
-    return res.status(200).json({
-        success : true,
-        message : "Project values updated successfully",
-    });
-}
-
+// Delete Project Data
 const deleteProjectData = async (req, res) => {
     const { projectName } = req.body;
+    if (!projectName) return res.status(400).json({ success: false, message: "Project name required" });
 
-    if(!projectName){
-        return res.status(400).json({
-            success : false,
-            message : "Project name required",
-        });
-    }
+    try {
+        const rows = await getAllProjectData();
+        const rowIndex = findRowIndex(rows, projectName);
+        if (rowIndex === -1) return res.status(400).json({ success: false, message: "Project not found" });
 
-    let response = await sheets.spreadsheets.values.get({
-        auth,
-        spreadsheetId : sheetId,
-        range : "AllProjects!A:N",
-    });
-
-    const rows = response.data.values;
-
-    if(rows.length == 0){
-        return res.status(400).json({
-            success : false,
-            message : "No project data found"
-        })
-    }
-
-    let rowIndex = -1;
-    for(let i = 0; i < rows.length; i++){
-        if(rows[i][0] == projectName){
-            rowIndex = i;
-            break;
-        }
-    }
-
-    response = await sheets.spreadsheets.batchUpdate({
-        auth,
-        spreadsheetId : sheetId,
-        resource : {
-            requests : [
-                {
-                    deleteDimension : {
-                        range : {
-                            sheetId : 0,
-                            dimension : "ROWS",
-                            startIndex : rowIndex,
-                            endIndex : rowIndex + 1
+        await sheets.spreadsheets.batchUpdate({
+            spreadsheetId: sheetId,
+            resource: {
+                requests: [{
+                    deleteDimension: {
+                        range: {
+                            sheetId: 0,
+                            dimension: "ROWS",
+                            startIndex: rowIndex,
+                            endIndex: rowIndex + 1
                         }
                     }
-                }
-            ]
-        }
-    });
+                }]
+            }
+        });
 
-    return res.status(200).json({
-        success : true,
-        message : "Project deleted successfully",
-    });
-}
+        return res.status(200).json({ success: true, message: "Project deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting project:", error);
+        return res.status(500).json({ success: false, message: "Error deleting project data" });
+    }
+};
+
 module.exports = { sendProjectData, getProjectData, updateProjectValues, deleteProjectData };
