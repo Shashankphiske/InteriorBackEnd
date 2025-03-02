@@ -1,129 +1,97 @@
 const { google } = require("googleapis");
 require("dotenv").config();
 
-const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
 const credentials = require("../../credentials.json");
-const auth = new google.auth.JWT(
-    credentials.client_email,
-    null,
-    credentials.private_key,
-    scopes,
-);
+
+const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
+const auth = new google.auth.JWT(credentials.client_email, null, credentials.private_key, scopes);
+const sheets = google.sheets({ version: "v4", auth });
+
 const sheetId = process.env.salesAssociateSheetId;
 const range = "SalesAssociateData!A:D";
 
-const sheets = google.sheets({version : "v4", auth});
+// Utility function to fetch all sales associate data
+const fetchSalesAssociateData = async () => {
+    try {
+        const response = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range });
+        return response.data.values || [];
+    } catch (error) {
+        console.error("Error fetching Sales Associate data:", error);
+        return [];
+    }
+};
 
+// Add a new sales associate
 const sendSalesAssociateData = async (req, res) => {
     const { name, email, phonenumber, address } = req.body;
-    
-    if(!name || !email || !phonenumber || !address){
-        return res.status(400).json({
-            success : false,
-            message : "All fields are required",
-        });
+
+    if (![name, email, phonenumber, address].every(Boolean)) {
+        return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
-    const response = await sheets.spreadsheets.values.append({
-        spreadsheetId : sheetId,
-        range,
-        valueInputOption : "RAW",
-        insertDataOption : "INSERT_ROWS",
-        requestBody : {
-            values : [[name, email, phonenumber, address]]
-        }
-    });
+    try {
+        await sheets.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range,
+            valueInputOption: "RAW",
+            insertDataOption: "INSERT_ROWS",
+            requestBody: { values: [[name, email, phonenumber, address]] },
+        });
 
-    res.status(200).json({
-        success : true,
-        message : "Associate data added successfully",
-    });
-}
+        return res.status(200).json({ success: true, message: "Associate data added successfully" });
+    } catch (error) {
+        console.error("Error adding sales associate data:", error);
+        return res.status(500).json({ success: false, message: "Failed to add associate data" });
+    }
+};
 
+// Retrieve all sales associates
 const getSalesAssociateData = async (req, res) => {
-    const response = await sheets.spreadsheets.values.get({
-        spreadsheetId : sheetId,
-        range,
-    });
+    try {
+        const rows = await fetchSalesAssociateData();
+        if (!rows.length) {
+            return res.status(400).json({ success: false, message: "No associate data found" });
+        }
+        return res.status(200).json({ success: true, message: "Data fetched successfully", body: rows });
+    } catch (error) {
+        console.error("Error fetching sales associate data:", error);
+        return res.status(500).json({ success: false, message: "Failed to fetch data" });
+    }
+};
 
-    return res.status(200).json({
-        success : true,
-        message : "Associate data fetched successfully",
-        body : response.data.values,
-    });
-
-}
-
-const SalesAssociateData = async () => {
-    const response = await sheets.spreadsheets.values.get({
-        spreadsheetId : sheetId,
-        range,
-    });
-
-    return response.data.values;
-
-}
-
+// Delete a sales associate by email
 const deleteSalesAssociateData = async (req, res) => {
-    const {email} = req.body;
+    const { email } = req.body;
 
-    if(!email){
-        res.status(400).json({
-            success : false,
-            message : "Email is required",
-        });
+    if (!email) {
+        return res.status(400).json({ success: false, message: "Email is required" });
     }
 
-    const response = await sheets.spreadsheets.values.get({
-        spreadsheetId : sheetId,
-        range,
-    });
+    try {
+        const rows = await fetchSalesAssociateData();
+        const index = rows.findIndex(row => row[1] === email); // Find index based on email
 
-    const rows = response.data.values;
-    if(rows.length == 0){
-        return res.status(400).json({
-            success : false,
-            message : "No associate data found",
-        });
-    }
-
-    let index = -1;
-    for(let i = 0; i < rows.length; i++){
-        if(rows[i][1] === email){
-            index = i;
-            break;
+        if (index === -1) {
+            return res.status(400).json({ success: false, message: "No associate found with this email" });
         }
-    }
 
-    if(index == -1){
-        return res.status(400).json({
-            success : false,
-            message : "No associate related to email found",
-        });
-    }
-
-    await sheets.spreadsheets.batchUpdate({
-        spreadsheetId : sheetId,
-        resource : {
-            requests : [
-                {
-                    deleteDimension : {
-                        range : {
-                            sheetId : 0,
-                            dimension : "ROWS",
-                            startIndex : index,
-                            endIndex : index + 1,
-                        }
+        await sheets.spreadsheets.batchUpdate({
+            spreadsheetId: sheetId,
+            resource: {
+                requests: [{
+                    deleteDimension: {
+                        range: { sheetId: 0, dimension: "ROWS", startIndex: index, endIndex: index + 1 }
                     }
-                }
-            ]
-        }
-    });
+                }]
+            }
+        });
 
-    return res.status(200).json({
-        success : true,
-        message : "Associate deleted successfully",
-    });
-}
+        return res.status(200).json({ success: true, message: "Associate deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting sales associate:", error);
+        return res.status(500).json({ success: false, message: "Failed to delete associate data" });
+    }
+};
 
-module.exports = { sendSalesAssociateData, getSalesAssociateData, deleteSalesAssociateData, SalesAssociateData };
+// Export functions
+module.exports = { sendSalesAssociateData, getSalesAssociateData, deleteSalesAssociateData, fetchSalesAssociateData };

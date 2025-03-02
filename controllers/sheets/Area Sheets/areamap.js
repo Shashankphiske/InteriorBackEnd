@@ -97,15 +97,5 @@ const getAreaMap = async (areaMap) => {
     }
 }
 
-const getAllAreaMap = async () => {
-    const response = await sheets.spreadsheets.values.get({
-        spreadsheetId : sheetId,
-        range : range,
-    });
 
-    const rows = response.data.values;
-
-    return rows;
-}
-
-module.exports = { addAreaMap, deleteAreaMap, getAreaMap, getAllAreaMap };
+module.exports = { addAreaMap, deleteAreaMap, getAreaMap };

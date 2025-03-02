@@ -2,10 +2,6 @@ const { google } = require("googleapis");
 require("dotenv").config();
 
 const credentials = require("../../credentials.json");
-const { CustomerData } = require("./customersheets");
-const { InteriorData } = require("./interiorsheets");
-const { SalesAssociateData } = require("./salesAssociatesheets");
-const { AllAreaData } = require("./Area Sheets/areasheets");
 
 const sheetId = process.env.SHEET_ID;
 const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
@@ -54,34 +50,12 @@ const sendProjectData = async (req, res) => {
     }
 };
 
-// Add customer, interior, sales associate, and area data to rows
-const addValues = async (rows) => {
-    const [customerRows, interiorRows, salesAssociateRows, allAreaRows] = await Promise.all([
-        CustomerData(),
-        InteriorData(),
-        SalesAssociateData(),
-        AllAreaData(),
-    ]);
-
-    return rows.map(row => [
-        row[0],
-        customerRows.find(c => c[1] === row[1]) || row[1],
-        row[2], row[3], row[4], row[5], row[6], row[7], row[8],
-        interiorRows.find(i => i[0] === row[9]) || row[9],
-        salesAssociateRows.find(s => s[0] === row[10]) || row[10],
-        allAreaRows.find(a => a[0] === row[11]) || row[11],
-        row[12], row[13]
-    ]);
-};
-
-// Get Project Data
 const getProjectData = async (req, res) => {
     try {
         const rows = await getAllProjectData();
         if (!rows.length) return res.status(400).json({ success: false, message: "No project data available" });
 
-        const finalRows = await addValues(rows);
-        return res.status(200).json({ success: true, message: "Data Fetched", body: finalRows });
+        return res.status(200).json({ success: true, message: "Data Fetched", body: rows });
     } catch (error) {
         console.error("Error retrieving project data:", error);
         return res.status(500).json({ success: false, message: "Error retrieving data from sheets" });
