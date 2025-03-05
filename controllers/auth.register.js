@@ -17,7 +17,7 @@ const registerUser = async (req, res) => {
             });
             throw new Error("All fields are required");
         }
-    
+        console.log(email);
         const userExists = await User.findOne({email});
         if(userExists){
             console.log("User already exists with the specified email address");
@@ -27,6 +27,8 @@ const registerUser = async (req, res) => {
             });
             throw new Error("User exists");
         }
+
+        console.log(userExists);
     
         const verificationToken = generateVerificationToken();
         const verificationTokenExpiresAt = Date.now() + 15 * 60 * 1000;

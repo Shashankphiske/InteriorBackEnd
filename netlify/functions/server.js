@@ -34,6 +34,8 @@ app.use(cookieParser());
 app.use(helmet());
 app.use(cors(corsOptions));
 
+connectDB();
+
 app.get("/.netlify/functions/server", (req, res) => {
     res.send("App running");
 })
