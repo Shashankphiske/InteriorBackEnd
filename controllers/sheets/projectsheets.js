@@ -5,7 +5,7 @@ const credentials = require("../../credentials.json");
 
 const sheetId = process.env.SHEET_ID;
 const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
-const auth = new google.auth.JWT(credentials.client_email, null, credentials.private_key, scopes);
+const auth = new google.auth.JWT(process.env.client_email, null, process.env.private_key.replace(/\\n/g, "\n"), scopes);
 const sheets = google.sheets({ version: "v4", auth });
 
 // Utility function to fetch all project data
@@ -14,6 +14,7 @@ const getAllProjectData = async () => {
         spreadsheetId: sheetId,
         range: "AllProjects!A:N",
     });
+    console.log(response);
     return response.data.values || [];
 };
 
@@ -54,7 +55,6 @@ const getProjectData = async (req, res) => {
     try {
         const rows = await getAllProjectData();
         if (!rows.length) return res.status(400).json({ success: false, message: "No project data available" });
-
         return res.status(200).json({ success: true, message: "Data Fetched", body: rows });
     } catch (error) {
         console.error("Error retrieving project data:", error);

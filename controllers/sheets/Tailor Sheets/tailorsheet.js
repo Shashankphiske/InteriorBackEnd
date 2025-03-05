@@ -1,20 +1,9 @@
-const { google } = require("googleapis");
+const { sheets } = require("../../../db/googleuser");
 require("dotenv").config();
 
-const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
-const credentials = require("../../../credentials.json");
 const range = "Tailors!A:D";
 
 const sheetId = process.env.tailorsheetid;
-
-const auth = new google.auth.JWT(
-    credentials.client_email,
-    null,
-    credentials.private_key,
-    scopes,
-);
-
-const sheets = google.sheets({version : "v4", auth});
 
 const addTailor = async (req, res) => {
     const { tailorName, phoneNumber, email, address } = req.body;

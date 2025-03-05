@@ -1,19 +1,9 @@
-const { google } = require("googleapis");
+const { sheets } = require("../../../db/googleuser");
 require("dotenv").config();
 
-const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
-const credentials = require("../../../credentials.json");
 const sheetId = process.env.areamapsheetid;
-const auth = new google.auth.JWT(
-    credentials.client_email,
-    null,
-    credentials.private_key,
-    scopes,
-);
 
 const range = "Sheet1!A:B";
-
-const sheets = google.sheets({version : "v4", auth});
 
 const addAreaMap = async (areaName, newSheetId) => {
     const response = await sheets.spreadsheets.values.append({

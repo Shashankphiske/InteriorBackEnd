@@ -1,20 +1,9 @@
-const { google } = require("googleapis");
 require("dotenv").config();
+const { sheets } = require("../../../db/googleuser");
 
-const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
-const credentials = require("../../../credentials.json");
 const range = "Brands!A:B";
 
-const auth = new google.auth.JWT(
-    credentials.client_email,
-    null,
-    credentials.private_key,
-    scopes
-);
-
 const sheetId = process.env.brandsheetid;
-
-const sheets = google.sheets({ version : "v4", auth });
 
 const addBrand = async (req, res) => {
     const { brandName, description } = req.body;

@@ -1,23 +1,10 @@
-const { google } = require("googleapis");
+const { sheets } = require("../../../db/googleuser");
 require("dotenv").config();
-const fs = require("fs");
-const { addAreaMap, deleteAreaMap, getAreaMap, getAllAreaMap } = require("./areamap");
+const { addAreaMap, getAreaMap } = require("./areamap");
 
-const credentials = require("../../../credentials.json");
-const { getAllProductGroups, AllProductGroups } = require("../Product Sheets/productgroupsheets");
-
-const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
 const sheetId = process.env.allareaspreadsheetid;
 let range = "{areaName}!A:F";
 
-const auth = new google.auth.JWT(
-    credentials.client_email,
-    null,
-    credentials.private_key,
-    scopes,
-);
-
-const sheets = google.sheets({version : "v4", auth});
 
 const addNewSheet = async (areaName) => {
     const response = await sheets.spreadsheets.batchUpdate({

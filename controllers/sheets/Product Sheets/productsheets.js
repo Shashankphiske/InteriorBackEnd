@@ -1,18 +1,7 @@
-const { google } = require("googleapis");
+const { sheets } = require("../../../db/googleuser");
 require("dotenv").config();
 
-const credentials = require("../../../credentials.json");
-const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
-const auth  = new google.auth.JWT(
-    credentials.client_email,
-    null,
-    credentials.private_key,
-    scopes,
-)
-
 const sheetId = process.env.productsheetid;
-
-const sheets = google.sheets({ version : "v4", auth });
 
 const range = "IndividualProducts!A:F";
 
@@ -98,7 +87,7 @@ const deleteSingleProduct = async (req, res) => {
         }
     });
 
-    return res.status(400).json({
+    return res.status(200).json({
         success : false,
         message : `${productName} deleted successfully`,
     });
