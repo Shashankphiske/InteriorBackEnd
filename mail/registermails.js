@@ -28,7 +28,7 @@ const sendWelcomeEmail = async (email, name) => {
     try{
         const response = await mailsender.sendMail({
             to : email,
-            from : "shashankphiskework@gmail.com",
+            from : process.env.user,
             subject : "Welcome to Interior Project",
             html : emailcontent,
         });

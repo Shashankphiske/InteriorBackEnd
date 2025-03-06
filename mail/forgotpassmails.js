@@ -3,9 +3,8 @@ const { mailsender } = require("./mailsetup");
 require("dotenv").config();
 
 const sendForgotPasswordMail = async (token, email) => {
-    const emailcontent = PASSWORD_RESET_REQUEST_TEMPLATE.replace("{resetURL}", `http://localhost:5174/resetpassword/${token}`);
+    const emailcontent = PASSWORD_RESET_REQUEST_TEMPLATE.replace("{resetURL}", `http://localhost:5174/forgotpass/reset/${token}`);
 
-    console.log(token,email);
     try{
         const response = await mailsender.sendMail({
             to : email,
@@ -13,7 +12,7 @@ const sendForgotPasswordMail = async (token, email) => {
             subject : "Reset password for Interior Project",
             html : emailcontent,
         });
-        console.log("Password reset mail sent successfully");
+
         return response;
     }
     catch(error){
@@ -31,8 +30,6 @@ const sendPasswordResetSuccessMail = async (email, name) => {
             subject : "Password for Interior Project changes successfully",
             html : emailcontent,
         });
-
-        console.log("Password change mail sent successfully");
 
         return response;
     }

@@ -7,28 +7,24 @@ const jwt = require("jsonwebtoken");
 
 const registerUser = async (req, res) => {
     const { email, name, password } = req.body;
-
     try{
         if(!email || !name || !password){
-            console.log("All fields are required");
+
             return res.status(400).json({
                 success : false,
                 message : "All fields are required",
             });
             throw new Error("All fields are required");
         }
-        console.log(email);
         const userExists = await User.findOne({email});
         if(userExists){
-            console.log("User already exists with the specified email address");
+
             return res.status(400).json({
                 success : false,
                 message : "User already exists with the specified email address",
             });
             throw new Error("User exists");
         }
-
-        console.log(userExists);
     
         const verificationToken = generateVerificationToken();
         const verificationTokenExpiresAt = Date.now() + 15 * 60 * 1000;
@@ -41,7 +37,7 @@ const registerUser = async (req, res) => {
             verificationToken : verificationToken,
             verificationTokenExpiresAt : verificationTokenExpiresAt,
         });
-    
+
         await user.save();
     
         generateTokenAndSetCookie(res, user._id);
@@ -54,7 +50,7 @@ const registerUser = async (req, res) => {
         });
     }
     catch (error){
-        console.log("Error in auth.register.js :", error);
+
         return res.status(500).json({
             success : false,
             message : "Internal server error",
@@ -63,50 +59,64 @@ const registerUser = async (req, res) => {
 }
 
 const verifyUser = async (req, res) => {
+
     const { code } = req.body;
     const cookie = req.cookies.token;
 
-    const decoded = jwt.verify(cookie, process.env.SECRET);
-    
-    try{
-        const user = await User.findOne({
-            verificationToken : code,
-            verificationTokenExpiresAt : { $gt : Date.now() },
-            _id : decoded.id,
+    // Check if token exists
+    if (!cookie) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized: No token provided",
         });
+    }
 
-        if(!user){
-            console.log("Invalid code or user doesnt exist");
+    let decoded;
+    try {
+        decoded = jwt.verify(cookie, process.env.SECRET);
+    } catch (err) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized: Invalid or expired token",
+        });
+    }
+
+    try {
+        const user = await User.findOne({
+            verificationToken: code,
+            verificationTokenExpiresAt: { $gt: Date.now() },
+            _id: decoded.id,
+        }).select("-password");
+
+        if (!user) {
+  
             return res.status(400).json({
-                success : false,
-                message : "Invalid or expired code",
+                success: false,
+                message: "Invalid or expired code",
             });
         }
+
         user.verified = true;
         user.verificationToken = undefined;
         user.verificationTokenExpiresAt = undefined;
         await user.save();
 
         await sendWelcomeEmail(user.email, user.name);
-
         console.log("Welcome mail sent successfully");
+
         return res.status(200).json({
-            success : true,
-            message : "Welcome mail sent successfully",
-            user : {
-                ...user._doc,
-                password : null,
-            }
+            success: true,
+            message: "Welcome mail sent successfully",
+            user,
         });
 
-    }
-    catch (error){
-        console.log("Error in user verification");
+    } catch (error) {
         return res.status(500).json({
-            success : false,
-            message : "Internal server error in email validation",
-        })
+            success: false,
+            message: "Internal server error in email validation",
+        });
     }
-}
+};
+
 
 module.exports = { registerUser, verifyUser };

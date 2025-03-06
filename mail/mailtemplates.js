@@ -103,12 +103,12 @@ const WELCOME_MAIL = `<!DOCTYPE html>
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
   <div style=" background: linear-gradient(to right, #0ea5e9, #0284c7); padding: 20px; text-align: center;">
-    <h1 style="color: white; margin: 0;">Welcome to InteriorProject</h1>
+    <h1 style="color: white; margin: 0;">Welcome to Sheela Decor</h1>
   </div>
   <div style="background-color: #0ea5e9; padding: 20px; border-radius: 0 0 5px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
     <p>Hello <strong>{username}</strong>,</p>
     <p>We're thrilled to have you on board! </p>
-    <p>At <strong>Interior Project</strong>, we are committed to providing the best products and services to you.</p>
+    <p>At <strong>Sheela Decor</strong>, we are committed to providing the best products and services to you.</p>
     <p>Here’s what you can do next:</p>
     <ul>
       <li>Reach out to us anytime for support</li>
