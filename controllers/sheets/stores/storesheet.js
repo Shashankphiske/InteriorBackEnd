@@ -1,12 +1,12 @@
 const { sheets } = require("../../../db/googleuser");
 require("dotenv").config();
 
-const range = "Stores!A:B";
+const range = "Stores!A:D";
 const sheetId = process.env.storesheetid;
 
 
 const addStore = async (req, res) => {
-    const { storeName, storeAddress } = req.body;
+    const { storeName, storeAddress, phonenumber, email } = req.body;
 
     if(!storeName || !storeAddress){
         return res.status(400).json({
@@ -21,7 +21,7 @@ const addStore = async (req, res) => {
         insertDataOption : "INSERT_ROWS",
         valueInputOption : "RAW",
         requestBody : {
-            values : [[ storeName, storeAddress ]],
+            values : [[ storeName, storeAddress, phonenumber, email ]],
         }
     });
 
@@ -109,7 +109,7 @@ const getAllStores = async (req, res) => {
 }
 
 const updateStores = async (req, res) => {
-    const { storeName, storeAddress } = req.body;
+    const { storeName, storeAddress, phonenumber, email } = req.body;
 
     if(!storeName){
         return res.status(400).json({
@@ -146,11 +146,13 @@ const updateStores = async (req, res) => {
     const newrow = [
         storeName,
         storeAddress ?? row[1],
+        phonenumber ?? row[2],
+        email ?? row[3]
     ];
 
     await sheets.spreadsheets.values.update({
         spreadsheetId : sheetId,
-        range : `Stores!A${index}:B${index}`,
+        range : `Stores!A${index}:D${index}`,
         valueInputOption : "RAW",
         resource : {
             values : [newrow],

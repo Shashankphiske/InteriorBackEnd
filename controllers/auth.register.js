@@ -65,6 +65,7 @@ const verifyUser = async (req, res) => {
 
     // Check if token exists
     if (!cookie) {
+        console.log("No cookie")
         return res.status(401).json({
             success: false,
             message: "Unauthorized: No token provided",
@@ -75,6 +76,7 @@ const verifyUser = async (req, res) => {
     try {
         decoded = jwt.verify(cookie, process.env.SECRET);
     } catch (err) {
+        console.log("Unauthorized");
         return res.status(401).json({
             success: false,
             message: "Unauthorized: Invalid or expired token",
@@ -82,14 +84,15 @@ const verifyUser = async (req, res) => {
     }
 
     try {
+        console.log(decoded.id);
         const user = await User.findOne({
             verificationToken: code,
             verificationTokenExpiresAt: { $gt: Date.now() },
             _id: decoded.id,
-        }).select("-password");
+        });
 
         if (!user) {
-  
+            console.log("no user")
             return res.status(400).json({
                 success: false,
                 message: "Invalid or expired code",

@@ -15,19 +15,19 @@ const loginUser = async (req, res) => {
                 message : "Incorrect email or password",
             });
         }
-        const userpass = await user.password;
+        const userpass = user.password;
 
         const ispassvalid = await bcrypt.compare(password, userpass);
         
-        if(ispassvalid == false){
+        if(ispassvalid === false){
             console.log("Invalid password");
             return res.status(400).json({
                 success : false,
                 message : "Invalid Credentials",
             });
+        }else{
+            generateTokenAndSetCookie(res, user._id);
         }
-
-        generateTokenAndSetCookie(res, user._id);
 
         user.lastlogin = Date.now();
         await user.save();

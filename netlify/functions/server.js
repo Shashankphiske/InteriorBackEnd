@@ -22,11 +22,13 @@ const { getCatalogues, addCatalogue, deleteCatalogue, updateCatalogue } = requir
 const { getTasks, addTask, updateTask, deleteTask } = require("../../controllers/sheets/Task Sheets/tasksheet");
 
 const corsOptions = {
-    origin : "http://localhost:5173",
-    methods : "POST, PUT, GET, DELETE, PATCH, HEAD",
+    origin: process.env.NODE_ENV === "production"
+      ? "http://localhost:5173" // Your frontend domain in production
+      : "https://sheeladecor.netlify.app", // Local dev
+    methods: "POST, PUT, GET, DELETE, PATCH, HEAD",
     allowedHeaders: "Content-Type, Authorization",
-    credentials : true,
-}
+    credentials: true, // Allow cookies
+  };
 
 const app = express();
 app.use(bodyParser.json());
@@ -36,17 +38,20 @@ app.use(helmet());
 app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
-        ? 'http://localhost:5173' 
-        : 'http://localhost:5173');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+    res.header(
+      "Access-Control-Allow-Origin",
+      process.env.NODE_ENV === "production"
+      ? "http://localhost:5173"
+        : "https://sheeladecor.netlify.app"
+    );
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (req.method === "OPTIONS") {
+      return res.status(200).end();
     }
     next();
-});
+  });
 
 connectDB();
 
