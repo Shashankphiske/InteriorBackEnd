@@ -90,15 +90,15 @@ const getInteriorData = async (req, res) => {
 
 // Delete an interior data entry by email
 const deleteInteriorData = async (req, res) => {
-    const { email } = req.body;
+    const { name } = req.body;
 
-    if (!email) {
-        return res.status(400).json({ success: false, message: "Email is required for deletion" });
+    if (!name) {
+        return res.status(400).json({ success: false, message: "Name is required for deletion" });
     }
 
     try {
         const rows = await fetchInteriorData();
-        const index = rows.findIndex(row => row[1] === email); // Find index based on email
+        const index = rows.findIndex(row => row[0] === name); // Find index based on email
 
         if (index === -1) {
             return res.status(400).json({ success: false, message: "No row related to email found" });
