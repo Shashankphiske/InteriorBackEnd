@@ -15,6 +15,57 @@ const fetchInteriorData = async () => {
     }
 };
 
+const updateInteriorData = async (req, res) => {
+    const { name, email, phonenumber, address } = req.body;
+
+    if(!name){
+        return res.status(400).json({
+            success : "false",
+            message : "Interior name is required",
+        });
+    }
+
+    const data = await fetchInteriorData();
+
+    let interior = -1;
+    let index = -1;
+
+    for(let i = 0; i < data.length; i++){
+        if(data[i][0] == name){
+            interior = data[i];
+            index = i;
+            break;
+        }
+    }
+
+    if(interior == -1){
+        return res.status(400).json({
+            success : "false",
+            message : "No data found with this name",
+        });
+    }
+
+    const newinterior = [
+        name,
+        email ?? interior[1],
+        phonenumber ?? interior[2],
+        address ?? interior[3]
+    ];
+
+    const response = await sheets.spreadsheets.values.update({
+        spreadsheetId : sheetId,
+        range : `InteriorData!A${index}:D${index}`,
+        valueInputOption : "RAW",
+        resource : { values : [newinterior] },
+    })
+
+    return res.status(200).json({
+        success : "true",
+        message : "Interior Updated"
+    });
+
+}
+
 // Add a new interior data entry
 const sendInteriorData = async (req, res) => {
     const { name, email, phonenumber, address } = req.body;
