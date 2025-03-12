@@ -55,15 +55,15 @@ const getSalesAssociateData = async (req, res) => {
 
 // Delete a sales associate by email
 const deleteSalesAssociateData = async (req, res) => {
-    const { email } = req.body;
+    const { name } = req.body;
 
-    if (!email) {
-        return res.status(400).json({ success: false, message: "Email is required" });
+    if (!name) {
+        return res.status(400).json({ success: false, message: "Name is required" });
     }
 
     try {
         const rows = await fetchSalesAssociateData();
-        const index = rows.findIndex(row => row[1] === email); // Find index based on email
+        const index = rows.findIndex(row => row[0] === name); // Find index based on email
 
         if (index === -1) {
             return res.status(400).json({ success: false, message: "No associate found with this email" });
