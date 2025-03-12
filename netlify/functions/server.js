@@ -9,7 +9,7 @@ const helmet = require("helmet");
 const cors = require("cors");
 const { checkAuth, checkAuthLogout } = require("../../controllers/auth.checkUser");
 const { sendProjectData, getProjectData, updateProjectValues, deleteProjectData } = require("../../controllers/sheets/projectsheets");
-const { sendCustomerData, deleteCustomerData, getCustomerData } = require("../../controllers/sheets/customersheets");
+const { sendCustomerData, deleteCustomerData, getCustomerData, updateCustomerData } = require("../../controllers/sheets/customersheets");
 const { sendInteriorData, getInteriorData, deleteInteriorData, updateInteriorData } = require("../../controllers/sheets/interiorsheets");
 const { sendSalesAssociateData, getSalesAssociateData, deleteSalesAssociateData, updateSalesAssociateData } = require("../../controllers/sheets/salesAssociatesheets");
 const { addDataToArea, removeDataFromArea, getDataFromArea, updateDataOfArea } = require("../../controllers/sheets/Area Sheets/areasheets");
@@ -68,12 +68,13 @@ app.get("/.netlify/functions/server/checklogout", checkAuthLogout);
 app.post("/.netlify/functions/server/sendprojectdata", sendProjectData);
 app.get("/.netlify/functions/server/getprojectdata", getProjectData);
 app.post("/.netlify/functions/server/updateprojectdata", updateProjectValues);
+app.post("/.netlify/functions/server/deleteprojectdata", deleteProjectData);
 
 //customerdata routes
 app.post("/.netlify/functions/server/sendcustomerdata", sendCustomerData);
 app.post("/.netlify/functions/server/deletecustomerdata", deleteCustomerData);
 app.get("/.netlify/functions/server/getcustomerdata", getCustomerData);
-app.post("/.netlify/functions/server/deleteprojectdata", deleteProjectData);
+app.post("/.netlify/functions/server/updatecustomerdata", updateCustomerData);
 
 //interior person data
 app.post("/.netlify/functions/server/sendinteriordata", sendInteriorData);

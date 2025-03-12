@@ -2,7 +2,7 @@ const { sheets } = require("../../db/googleuser");
 require("dotenv").config();
 
 const sheetId = process.env.customerSheetId;
-const range = "CustomerData!A:D";
+const range = "CustomerData!A:C";
 
 // Utility function to fetch all customer data
 const fetchCustomerData = async () => {
@@ -37,7 +37,7 @@ const sendCustomerData = async (req, res) => {
             range,
             valueInputOption: "RAW",
             insertDataOption: "INSERT_ROWS",
-            requestBody: { values: [[srno, name, phonenumber, address]] },
+            requestBody: { values: [[name, phonenumber, address]] },
         });
 
         return res.status(200).json({ success: true, message: "Customer data inserted successfully" });
@@ -71,7 +71,7 @@ const deleteCustomerData = async (req, res) => {
 
     try {
         const rows = await fetchCustomerData();
-        const rowIndex = rows.findIndex(row => row[1] === name); // Find index based on name
+        const rowIndex = rows.findIndex(row => row[0] === name); // Find index based on name
 
         if (rowIndex === -1) {
             return res.status(400).json({ success: false, message: "User not found" });
@@ -95,8 +95,60 @@ const deleteCustomerData = async (req, res) => {
     }
 };
 
-// Fetch all customer data (for internal use)
-const CustomerData = async () => fetchCustomerData();
+const updateCustomerData = async (req, res) => {
+    const { name, phonenumber, address } = req.body;
+
+    if (!name) {
+        return res.status(400).json({
+            success: false,
+            message: "Customer name is required",
+        });
+    }
+
+    try {
+        const data = await fetchCustomerData(); // Fetch all sales associates
+        let index = -1;
+
+        for (let i = 0; i < data.length; i++) {
+            if (data[i][0] === name) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index === -1) {
+            return res.status(400).json({
+                success: false,
+                message: `No Customer found with the name: ${name}`,
+            });
+        }
+
+        const updatedCustomer = [
+            name,
+            phonenumber ?? data[index][1],
+            address ?? data[index][2],
+        ];
+
+        await sheets.spreadsheets.values.update({
+            spreadsheetId: sheetId,
+            range: `CustomerData!A${index + 1}:C${index + 1}`,
+            valueInputOption: "RAW",
+            resource: { values: [updatedCustomer] },
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Customer updated successfully",
+        });
+    } catch (error) {
+        console.error("Error updating Customer:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update Customer",
+        });
+    }
+};
+
 
 // Export functions
-module.exports = { sendCustomerData, deleteCustomerData, getCustomerData, getCustomerSerial, CustomerData };
+module.exports = { sendCustomerData, deleteCustomerData, getCustomerData, getCustomerSerial, updateCustomerData};
