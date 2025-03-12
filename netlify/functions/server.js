@@ -11,7 +11,7 @@ const { checkAuth, checkAuthLogout } = require("../../controllers/auth.checkUser
 const { sendProjectData, getProjectData, updateProjectValues, deleteProjectData } = require("../../controllers/sheets/projectsheets");
 const { sendCustomerData, deleteCustomerData, getCustomerData } = require("../../controllers/sheets/customersheets");
 const { sendInteriorData, getInteriorData, deleteInteriorData, updateInteriorData } = require("../../controllers/sheets/interiorsheets");
-const { sendSalesAssociateData, getSalesAssociateData, deleteSalesAssociateData } = require("../../controllers/sheets/salesAssociatesheets");
+const { sendSalesAssociateData, getSalesAssociateData, deleteSalesAssociateData, updateSalesAssociateData } = require("../../controllers/sheets/salesAssociatesheets");
 const { addDataToArea, removeDataFromArea, getDataFromArea, updateDataOfArea } = require("../../controllers/sheets/Area Sheets/areasheets");
 const { addNewProduct, deleteSingleProduct, updateSingleProduct, getSingleProducts } = require("../../controllers/sheets/Product Sheets/productsheets");
 const { addProductGroup, deleteProductGroup, updateProductGroup, getAllProductGroups } = require("../../controllers/sheets/Product Sheets/productgroupsheets");
@@ -85,6 +85,7 @@ app.post("/.netlify/functions/server/updateinteriordata", updateInteriorData);
 app.post("/.netlify/functions/server/sendsalesassociatedata", sendSalesAssociateData);
 app.get("/.netlify/functions/server/getsalesassociatedata", getSalesAssociateData);
 app.post("/.netlify/functions/server/deletesalesassociatedata", deleteSalesAssociateData);
+app.post("/.netlify/functions/server/updatesalesassociatedata", updateSalesAssociateData);
 
 //area data routes
 app.post("/.netlify/functions/server/addareadata", addDataToArea);

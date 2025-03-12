@@ -87,5 +87,61 @@ const deleteSalesAssociateData = async (req, res) => {
     }
 };
 
+const updateSalesAssociateData = async (req, res) => {
+    const { name, email, phonenumber, address } = req.body;
+
+    if (!name) {
+        return res.status(400).json({
+            success: false,
+            message: "Sales Associate name is required",
+        });
+    }
+
+    try {
+        const data = await fetchSalesAssociateData(); // Fetch all sales associates
+        let index = -1;
+
+        for (let i = 0; i < data.length; i++) {
+            if (data[i][0] === name) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index === -1) {
+            return res.status(400).json({
+                success: false,
+                message: `No Sales Associate found with the name: ${name}`,
+            });
+        }
+
+        const updatedSalesAssociate = [
+            name,
+            email ?? data[index][1],
+            phonenumber ?? data[index][2],
+            address ?? data[index][3],
+        ];
+
+        await sheets.spreadsheets.values.update({
+            spreadsheetId: sheetId,
+            range: `SalesAssociateData!A${index + 1}:D${index + 1}`,
+            valueInputOption: "RAW",
+            resource: { values: [updatedSalesAssociate] },
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Sales Associate updated successfully",
+        });
+    } catch (error) {
+        console.error("Error updating Sales Associate:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update Sales Associate",
+        });
+    }
+};
+
+
 // Export functions
-module.exports = { sendSalesAssociateData, getSalesAssociateData, deleteSalesAssociateData, fetchSalesAssociateData };
+module.exports = { sendSalesAssociateData, getSalesAssociateData, deleteSalesAssociateData, fetchSalesAssociateData, updateSalesAssociateData };
