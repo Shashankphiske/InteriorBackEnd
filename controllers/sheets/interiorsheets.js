@@ -18,53 +18,37 @@ const fetchInteriorData = async () => {
 const updateInteriorData = async (req, res) => {
     const { name, email, phonenumber, address } = req.body;
 
-    if(!name){
-        return res.status(400).json({
-            success : "false",
-            message : "Interior name is required",
-        });
+    if (!name) {
+        return res.status(400).json({ success: false, message: "Title is required" });
     }
 
-    const data = await fetchInteriorData();
+    try {
+        const rows = await fetchInteriorData();
+        const index = rows.findIndex(row => row[0] === name);
 
-    let interior = -1;
-    let index = -1;
-
-    for(let i = 0; i < data.length; i++){
-        if(data[i][0] == name){
-            interior = data[i];
-            index = i;
-            break;
+        if (index === -1) {
+            return res.status(404).json({ success: false, message: `No Interior found with name: ${name}` });
         }
-    }
 
-    if(interior == -1){
-        return res.status(400).json({
-            success : "false",
-            message : "No data found with this name",
+        // Keep existing values if new ones are not provided
+        const updatedRow = rows[index].map((value, i) => [
+            name, email, phonenumber, address
+        ][i] ?? value);
+
+        await sheets.spreadsheets.values.update({
+            spreadsheetId: sheetId,
+            range: `InteriorData!A${index + 1}:D${index + 1}`,
+            valueInputOption: "RAW",
+            resource: { values: [updatedRow] },
         });
+
+        return res.status(200).json({ success: true, message: "Interior updated successfully" });
+    } catch (error) {
+        console.error("Error updating task:", error);
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
+};
 
-    const newinterior = [
-        name,
-        email ?? interior[1],
-        phonenumber ?? interior[2],
-        address ?? interior[3]
-    ];
-
-    const response = await sheets.spreadsheets.values.update({
-        spreadsheetId : sheetId,
-        range : `InteriorData!A${index}:D${index}`,
-        valueInputOption : "RAW",
-        resource : { values : [newinterior] },
-    })
-
-    return res.status(200).json({
-        success : "true",
-        message : "Interior Updated"
-    });
-
-}
 
 // Add a new interior data entry
 const sendInteriorData = async (req, res) => {
@@ -139,4 +123,4 @@ const deleteInteriorData = async (req, res) => {
 };
 
 // Export functions
-module.exports = { sendInteriorData, getInteriorData, deleteInteriorData, fetchInteriorData };
+module.exports = { sendInteriorData, getInteriorData, deleteInteriorData, fetchInteriorData, updateInteriorData };

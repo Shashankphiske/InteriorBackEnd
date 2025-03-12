@@ -10,7 +10,7 @@ const cors = require("cors");
 const { checkAuth, checkAuthLogout } = require("../../controllers/auth.checkUser");
 const { sendProjectData, getProjectData, updateProjectValues, deleteProjectData } = require("../../controllers/sheets/projectsheets");
 const { sendCustomerData, deleteCustomerData, getCustomerData } = require("../../controllers/sheets/customersheets");
-const { sendInteriorData, getInteriorData, deleteInteriorData } = require("../../controllers/sheets/interiorsheets");
+const { sendInteriorData, getInteriorData, deleteInteriorData, updateInteriorData } = require("../../controllers/sheets/interiorsheets");
 const { sendSalesAssociateData, getSalesAssociateData, deleteSalesAssociateData } = require("../../controllers/sheets/salesAssociatesheets");
 const { addDataToArea, removeDataFromArea, getDataFromArea, updateDataOfArea } = require("../../controllers/sheets/Area Sheets/areasheets");
 const { addNewProduct, deleteSingleProduct, updateSingleProduct, getSingleProducts } = require("../../controllers/sheets/Product Sheets/productsheets");
@@ -79,6 +79,7 @@ app.post("/.netlify/functions/server/deleteprojectdata", deleteProjectData);
 app.post("/.netlify/functions/server/sendinteriordata", sendInteriorData);
 app.get("/.netlify/functions/server/getinteriordata", getInteriorData);
 app.post("/.netlify/functions/server/deleteinteriordata", deleteInteriorData);
+app.post("/.netlify/functions/server/updateinteriordata", updateInteriorData);
 
 //sales associate data
 app.post("/.netlify/functions/server/sendsalesassociatedata", sendSalesAssociateData);
