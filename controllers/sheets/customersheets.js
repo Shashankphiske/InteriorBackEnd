@@ -96,21 +96,21 @@ const deleteCustomerData = async (req, res) => {
 };
 
 const updateCustomerData = async (req, res) => {
-    const { name, phonenumber, address } = req.body;
+    const { title, description, date, time, assigneeLink, projectLink, priority, status } = req.body;
 
-    if (!name) {
+    if (!title) {
         return res.status(400).json({
             success: false,
-            message: "Customer name is required",
+            message: "Task title is required",
         });
     }
 
     try {
-        const data = await fetchCustomerData(); // Fetch all sales associates
+        const data = await fetchTaskData(); // Fetch all tasks
         let index = -1;
 
         for (let i = 0; i < data.length; i++) {
-            if (data[i][0] === name) {
+            if (data[i][0] === title) {
                 index = i;
                 break;
             }
@@ -119,35 +119,41 @@ const updateCustomerData = async (req, res) => {
         if (index === -1) {
             return res.status(400).json({
                 success: false,
-                message: `No Customer found with the name: ${name}`,
+                message: `No task found with the title: ${title}`,
             });
         }
 
-        const updatedCustomer = [
-            name,
-            phonenumber ?? data[index][1],
-            address ?? data[index][2],
+        const updatedTask = [
+            title,
+            description ?? data[index][1],
+            date ?? data[index][2],
+            time ?? data[index][3],
+            assigneeLink ?? data[index][4],
+            projectLink ?? data[index][5],
+            priority ?? data[index][6],
+            status ?? data[index][7],
         ];
 
         await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
-            range: `CustomerData!A${index + 1}:C${index + 1}`,
+            range: `Tasks!A${index + 1}:H${index + 1}`,
             valueInputOption: "RAW",
-            resource: { values: [updatedCustomer] },
+            resource: { values: [updatedTask] },
         });
 
         return res.status(200).json({
             success: true,
-            message: "Customer updated successfully",
+            message: "Task updated successfully",
         });
     } catch (error) {
-        console.error("Error updating Customer:", error);
+        console.error("Error updating task:", error);
         return res.status(500).json({
             success: false,
-            message: "Failed to update Customer",
+            message: "Failed to update task",
         });
     }
 };
+
 
 
 // Export functions

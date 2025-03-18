@@ -84,44 +84,44 @@ const getTasks = async (req, res) => {
 };
 
 // Update a task by title
-const updateTask = async (req, res) => {
-    const { title, description, date, time, assigneeLink, projectLink, priority, status } = req.body;
+    const updateTask = async (req, res) => {
+        const { title, description, date, time, assigneeLink, projectLink, priority, status } = req.body;
 
-    if (!title) {
-        return res.status(400).json({ success: false, message: "Title is required" });
-    }
-
-    try {
-        const rows = await fetchTaskData();
-        const index = rows.findIndex(row => row[0] === title);
-
-        if (index === -1) {
-            return res.status(400).json({ success: false, message: `No task with the title: ${title} found` });
+        if (!title) {
+            return res.status(400).json({ success: false, message: "Title is required" });
         }
 
-        const updatedRow = [
-            title,
-            description ?? rows[index][1],
-            date ?? rows[index][2],
-            time ?? rows[index][3],
-            assigneeLink ?? rows[index][4],
-            projectLink ?? rows[index][5],
-            priority ?? rows[index][6],
-            status ?? rows[index][7],
-        ];
+        try {
+            const rows = await fetchTaskData();
+            const index = rows.findIndex(row => row[0] === title);
 
-        await sheets.spreadsheets.values.update({
-            spreadsheetId: sheetId,
-            range: `Tasks!A${index + 1}:H${index + 1}`,
-            valueInputOption: "RAW",
-            resource: { values: [updatedRow] },
-        });
+            if (index === -1) {
+                return res.status(400).json({ success: false, message: `No task with the title: ${title} found` });
+            }
 
-        return res.status(200).json({ success: true, message: "Task updated successfully" });
-    } catch (error) {
-        console.error("Error updating task:", error);
-        return res.status(500).json({ success: false, message: "Failed to update task" });
-    }
-};
+            const updatedRow = [
+                title,
+                description ?? rows[index][1],
+                date ?? rows[index][2],
+                time ?? rows[index][3],
+                assigneeLink ?? rows[index][4],
+                projectLink ?? rows[index][5],
+                priority ?? rows[index][6],
+                status ?? rows[index][7],
+            ];
+
+            await sheets.spreadsheets.values.update({
+                spreadsheetId: sheetId,
+                range: `Tasks!A${index + 1}:H${index + 1}`,
+                valueInputOption: "RAW",
+                resource: { values: [updatedRow] },
+            });
+
+            return res.status(200).json({ success: true, message: "Task updated successfully" });
+        } catch (error) {
+            console.error("Error updating task:", error);
+            return res.status(500).json({ success: false, message: "Failed to update task" });
+        }
+    };
 
 module.exports = { addTask, deleteTask, getTasks, updateTask };
