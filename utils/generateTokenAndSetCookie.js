@@ -5,8 +5,6 @@ const generateTokenAndSetCookie = (res, id) => {
         expiresIn: "7d",
     });
 
-    console.log(token);
-
     // Manually set the "Set-Cookie" header with "Partitioned" attribute
     res.setHeader("Set-Cookie", `token=${token}; HttpOnly; Secure; SameSite=None; Partitioned; Max-Age=86400; Path=/`);
 
