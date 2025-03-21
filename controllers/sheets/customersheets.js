@@ -2,7 +2,7 @@ const { sheets } = require("../../db/googleuser");
 require("dotenv").config();
 
 const sheetId = process.env.customerSheetId;
-const range = "CustomerData!A:C";
+const range = "CustomerData!A:E";
 
 // Utility function to fetch all customer data
 const fetchCustomerData = async () => {
@@ -37,7 +37,7 @@ const sendCustomerData = async (req, res) => {
             range,
             valueInputOption: "RAW",
             insertDataOption: "INSERT_ROWS",
-            requestBody: { values: [[name, phonenumber, address]] },
+            requestBody: { values: [[name, phonenumber, address, alternatenumber, addedDate]] },
         });
 
         return res.status(200).json({ success: true, message: "Customer data inserted successfully" });
@@ -96,12 +96,12 @@ const deleteCustomerData = async (req, res) => {
 };
 
 const updateCustomerData = async (req, res) => {
-    const { title, description, date, time, assigneeLink, projectLink, priority, status } = req.body;
+    const { name, phonenumber, address, alternatenumber, addedDate } = req.body;
 
-    if (!title) {
+    if (!name) {
         return res.status(400).json({
             success: false,
-            message: "Task title is required",
+            message: "Customer name is required",
         });
     }
 
@@ -123,33 +123,30 @@ const updateCustomerData = async (req, res) => {
             });
         }
 
-        const updatedTask = [
-            title,
-            description ?? data[index][1],
-            date ?? data[index][2],
-            time ?? data[index][3],
-            assigneeLink ?? data[index][4],
-            projectLink ?? data[index][5],
-            priority ?? data[index][6],
-            status ?? data[index][7],
+        const updatedCustomer = [
+            name,
+            phonenumber ?? data[index][1],
+            address ?? data[index][2],
+            alternatenumber ?? data[index][3],
+            addedDate ?? data[index][4]
         ];
 
         await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
-            range: `Tasks!A${index + 1}:H${index + 1}`,
+            range: `Tasks!A${index + 1}:E${index + 1}`,
             valueInputOption: "RAW",
-            resource: { values: [updatedTask] },
+            resource: { values: [updatedCustomer] },
         });
 
         return res.status(200).json({
             success: true,
-            message: "Task updated successfully",
+            message: "Custoemr updated successfully",
         });
     } catch (error) {
         console.error("Error updating task:", error);
         return res.status(500).json({
             success: false,
-            message: "Failed to update task",
+            message: "Failed to update Customer",
         });
     }
 };

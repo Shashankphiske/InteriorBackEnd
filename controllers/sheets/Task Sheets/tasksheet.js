@@ -99,15 +99,16 @@ const getTasks = async (req, res) => {
                 return res.status(400).json({ success: false, message: `No task with the title: ${title} found` });
             }
 
+            const row = rows[index];
             const updatedRow = [
                 title,
-                description ?? rows[index][1],
-                date ?? rows[index][2],
-                time ?? rows[index][3],
-                assigneeLink ?? rows[index][4],
-                projectLink ?? rows[index][5],
-                priority ?? rows[index][6],
-                status ?? rows[index][7],
+                description?.trim() ? description : row[1],  // If empty string, keep old value
+                date?.trim() ? date : row[2],
+                time?.trim() ? time : row[3],
+                assigneeLink?.trim() ? assigneeLink : row[4],
+                projectLink?.trim() ? projectLink : row[5],
+                priority?.trim() ? priority : row[6],
+                status?.trim() ? status : row[7],
             ];
 
             await sheets.spreadsheets.values.update({
