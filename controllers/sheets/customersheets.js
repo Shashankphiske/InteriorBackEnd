@@ -23,7 +23,7 @@ const getCustomerSerial = async () => {
 
 // Add a new customer entry
 const sendCustomerData = async (req, res) => {
-    const { name, phonenumber, address } = req.body;
+    const { name, phonenumber, address, alternatenumber, addedDate } = req.body;
 
     if (![name, phonenumber, address].every(Boolean)) {
         return res.status(400).json({ success: false, message: "All fields are required" });
