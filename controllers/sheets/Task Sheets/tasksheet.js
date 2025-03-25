@@ -17,9 +17,9 @@ const fetchTaskData = async () => {
 
 // Add a new task
 const addTask = async (req, res) => {
-    const { title, description, date, time, assigneeLink, projectLink, priority, status } = req.body;
+    const { title, description, dateTime, date, assigneeLink, projectLink, priority, status } = req.body;
 
-    if (![title, description, date, time, assigneeLink, projectLink, priority, status].every(Boolean)) {
+    if (![title, description, dateTime, date, assigneeLink, projectLink, priority, status].every(Boolean)) {
         return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
@@ -29,7 +29,7 @@ const addTask = async (req, res) => {
             range,
             insertDataOption: "INSERT_ROWS",
             valueInputOption: "RAW",
-            requestBody: { values: [[title, description, date, time, assigneeLink, projectLink, priority, status]] },
+            requestBody: { values: [[title, description, dateTime, date, assigneeLink, projectLink, priority, status]] },
         });
 
         return res.status(200).json({ success: true, message: "New task added" });
@@ -85,7 +85,7 @@ const getTasks = async (req, res) => {
 
 // Update a task by title
     const updateTask = async (req, res) => {
-        const { title, description, date, time, assigneeLink, projectLink, priority, status } = req.body;
+        const { title, description, dateTime, date, assigneeLink, projectLink, priority, status } = req.body;
 
         if (!title) {
             return res.status(400).json({ success: false, message: "Title is required" });
@@ -103,8 +103,8 @@ const getTasks = async (req, res) => {
             const updatedRow = [
                 title,
                 description?.trim() ? description : row[1],  // If empty string, keep old value
-                date?.trim() ? date : row[2],
-                time?.trim() ? time : row[3],
+                dateTime?.trim() ? dateTime : row[2],
+                date?.trim() ? date : row[3],
                 assigneeLink?.trim() ? assigneeLink : row[4],
                 projectLink?.trim() ? projectLink : row[5],
                 priority?.trim() ? priority : row[6],
