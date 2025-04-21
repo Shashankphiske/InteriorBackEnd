@@ -20,6 +20,7 @@ const { getAllTailors, addTailor, deleteTailor, updateTailor } = require("../../
 const { getBrands, addBrand, deleteBrand, updateBrand } = require("../../controllers/sheets/Brand Sheets/brandsheets");
 const { getCatalogues, addCatalogue, deleteCatalogue, updateCatalogue } = require("../../controllers/sheets/Catalogue Sheets/cataloguesheets");
 const { getTasks, addTask, updateTask, deleteTask } = require("../../controllers/sheets/Task Sheets/tasksheet");
+const { fetchPaymentData, updatePaymentData, sendPaymentData, deletePaymentData } = require("../../controllers/sheets/paymentsheet");
 
 const corsOptions = {
     origin: process.env.NODE_ENV === "production"
@@ -135,5 +136,11 @@ app.get("/.netlify/functions/server/gettasks", getTasks);
 app.post("/.netlify/functions/server/addtask", addTask);
 app.post("/.netlify/functions/server/updatetask", updateTask);
 app.post("/.netlify/functions/server/deletetask", deleteTask);
+
+// payment routes
+app.get("/.netlify/functions/server/getPayments", fetchPaymentData);
+app.post("/.netlify/functions/server/updatePayments", updatePaymentData);
+app.post("/.netlify/functions/server/addPayment", sendPaymentData);
+app.post("/.netlify/functions/server/deletePayment", deletePaymentData);
 
 module.exports.handler = serverless(app); 

@@ -3,7 +3,7 @@ require("dotenv").config();
 
 const credentials = require("../../credentials.json");
 
-const sheetId = process.env.SHEET_ID;
+const sheetId = "1MrNq308z4mQIZXOcxuyGj3SC0TwBePemwilZeLyQ9WI";
 const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
 const auth = new google.auth.JWT(process.env.client_email, null, process.env.private_key.replace(/\\n/g, "\n"), scopes);
 const sheets = google.sheets({ version: "v4", auth });
@@ -12,10 +12,9 @@ const sheets = google.sheets({ version: "v4", auth });
 const getAllProjectData = async () => {
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: sheetId,
-        range: "AllProjects!A:O",
+        range: "AllProjects!A:P",
     });
-    console.log(response);
-    return response.data.values || [];
+    return response.data.values;
 };
 
 // Utility function to find row index by project name
@@ -25,22 +24,17 @@ const findRowIndex = (rows, projectName) => {
 
 // Send Project Data (Insert)
 const sendProjectData = async (req, res) => {
-    const { projectName, customerLink, projectReference, address, status, amount, received, due, createdBy, interiorPersonLink, salesAssociateLink, allAreaLink, quotationLink, projectDate } = req.body;
-
-    if (![projectName, customerLink, projectReference, address, status, received, due, createdBy, interiorPersonLink, salesAssociateLink, allAreaLink, quotationLink, projectDate].every(Boolean)) {
-        return res.status(400).json({ success: false, message: "All fields are required" });
-    }
-
-    const date = new Date().toISOString().replace("T", " ").slice(0, 19);
+    const { projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray } = req.body;
+    
 
     try {
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
-            range: "AllProjects!A:O",
+            range: "AllProjects!A:P",
             valueInputOption: "RAW",
             insertDataOption: "INSERT_ROWS",
             requestBody: {
-                values: [[projectName, customerLink, projectReference, address, status, amount, received, due, createdBy, interiorPersonLink, salesAssociateLink, allAreaLink, quotationLink, date, projectDate]],
+                values: [[projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray]],
             },
         });
 
@@ -54,7 +48,7 @@ const sendProjectData = async (req, res) => {
 const getProjectData = async (req, res) => {
     try {
         const rows = await getAllProjectData();
-        if (!rows.length) return res.status(400).json({ success: false, message: "No project data available" });
+        if (!rows) return res.status(400).json({ success: false, message: "No project data available" });
         return res.status(200).json({ success: true, message: "Data Fetched", body: rows });
     } catch (error) {
         console.error("Error retrieving project data:", error);
@@ -76,7 +70,7 @@ const updateProjectValues = async (req, res) => {
 
         await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
-            range: `AllProjects!A${rowIndex + 1}:O${rowIndex + 1}`,
+            range: `AllProjects!A${rowIndex + 1}:P${rowIndex + 1}`,
             valueInputOption: "RAW",
             resource: { values: [updatedRow] },
         });
