@@ -23,42 +23,55 @@ const { getTasks, addTask, updateTask, deleteTask } = require("../../controllers
 const { fetchPaymentData, updatePaymentData, sendPaymentData, deletePaymentData } = require("../../controllers/sheets/paymentsheet");
 
 const corsOptions = {
-    origin: process.env.NODE_ENV === "production"
-      ? "http://localhost:5173" // Your frontend domain in production
-      : "https://sheeladecor.netlify.app", // Local dev
-    methods: "POST, PUT, GET, DELETE, PATCH, HEAD",
-    allowedHeaders: "Content-Type, Authorization",
-    credentials: true, // Allow cookies
-  };
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "https://furnishkaro.netlify.app",
+      "http://localhost:5173",
+    ];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: "POST, PUT, GET, DELETE, PATCH, HEAD",
+  allowedHeaders: "Content-Type, Authorization",
+  credentials: true,
+};
 
 const app = express();
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended : true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(helmet());
 app.use(cors(corsOptions));
 
+// Keep your manual headers but update this:
 app.use((req, res, next) => {
-    res.header(
-      "Access-Control-Allow-Origin",
-      process.env.NODE_ENV === "production"
-      ? "http://localhost:5173"
-        : "https://sheeladecor.netlify.app"
-    );
-    res.header("Access-Control-Allow-Credentials", "true");
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    if (req.method === "OPTIONS") {
-      return res.status(200).end();
-    }
-    next();
-  });
+  const allowedOrigins = [
+    "https://furnishkaro.netlify.app",
+    "http://localhost:5173",
+  ];
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  next();
+});
 
 connectDB();
 
 app.get("/.netlify/functions/server", (req, res) => {
-    res.send("App running");
-})
+  res.send("App running");
+});
+
+
 
 
 app.use("/.netlify/functions/server/auth", loginrouter);

@@ -3,7 +3,7 @@ const { mailsender } = require("./mailsetup");
 require("dotenv").config();
 
 const sendForgotPasswordMail = async (token, email) => {
-    const emailcontent = PASSWORD_RESET_REQUEST_TEMPLATE.replace("{resetURL}", `http://localhost:5174/forgotpass/reset/${token}`);
+    const emailcontent = PASSWORD_RESET_REQUEST_TEMPLATE.replace("{resetURL}", `https://furnishkaro.netlify.app/forgotpass/reset/${token}`);
 
     try{
         const response = await mailsender.sendMail({

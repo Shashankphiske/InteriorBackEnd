@@ -12,7 +12,7 @@ const sheets = google.sheets({ version: "v4", auth });
 const getAllProjectData = async () => {
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: sheetId,
-        range: "AllProjects!A:P",
+        range: "AllProjects!A:R",
     });
     return response.data.values;
 };
@@ -24,17 +24,18 @@ const findRowIndex = (rows, projectName) => {
 
 // Send Project Data (Insert)
 const sendProjectData = async (req, res) => {
-    const { projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray } = req.body;
-    
+    const { projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress } = req.body;
+    console.log(projectName);
+    console.log(req.body);
 
     try {
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
-            range: "AllProjects!A:P",
+            range: "AllProjects!A:Q",
             valueInputOption: "RAW",
             insertDataOption: "INSERT_ROWS",
             requestBody: {
-                values: [[projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray]],
+                values: [[projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress]],
             },
         });
 
@@ -59,28 +60,75 @@ const getProjectData = async (req, res) => {
 // Update Project Values
 const updateProjectValues = async (req, res) => {
     const { projectName, ...updatedFields } = req.body;
-    if (!projectName) return res.status(400).json({ success: false, message: "Project name needed to update values" });
-
+    console.log(projectName);
+    console.log(req.body);
+  
+    if (!projectName)
+      return res.status(400).json({ success: false, message: "Project name needed to update values" });
+  
     try {
-        const rows = await getAllProjectData();
-        const rowIndex = findRowIndex(rows, projectName);
-        if (rowIndex === -1) return res.status(400).json({ success: false, message: "Project not found" });
-
-        const updatedRow = rows[rowIndex].map((value, index) => updatedFields[Object.keys(updatedFields)[index]] ?? value);
-
-        await sheets.spreadsheets.values.update({
-            spreadsheetId: sheetId,
-            range: `AllProjects!A${rowIndex + 1}:P${rowIndex + 1}`,
-            valueInputOption: "RAW",
-            resource: { values: [updatedRow] },
-        });
-
-        return res.status(200).json({ success: true, message: "Project updated successfully" });
+      const rows = await getAllProjectData();
+      const rowIndex = findRowIndex(rows, projectName);
+      if (rowIndex === -1)
+        return res.status(400).json({ success: false, message: "Project not found" });
+  
+      const fieldMapping = {
+        projectName: 0,
+        customerLink: 1,
+        projectReference: 2,
+        status: 3,
+        totalAmount: 4,
+        totalTax: 5,
+        paid: 6,
+        discount: 7,
+        createdBy: 8,
+        allData: 9,
+        projectDate: 10,
+        additionalRequests: 11,
+        interiorArray: 12,
+        salesAssociateArray: 13,
+        additionalItems: 14,
+        goodsArray: 15,
+        tailorsArray: 16,
+        projectAddress : 17
+      };
+  
+      const currentRow = rows[rowIndex];
+      const updatedRow = [];
+  
+      for (let field in fieldMapping) {
+        const columnIndex = fieldMapping[field];
+        const existingValue = currentRow[columnIndex];
+  
+        let newValue;
+  
+        if (updatedFields.hasOwnProperty(field)) {
+          if (typeof updatedFields[field] === "object") {
+            newValue = JSON.stringify(updatedFields[field]); // stringify arrays/objects
+          } else {
+            newValue = updatedFields[field];
+          }
+        } else {
+          newValue = existingValue;
+        }
+  
+        updatedRow[columnIndex] = newValue;
+      }
+  
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: sheetId,
+        range: `AllProjects!A${rowIndex + 1}:Q${rowIndex + 1}`,
+        valueInputOption: "RAW",
+        resource: { values: [updatedRow] },
+      });
+  
+      return res.status(200).json({ success: true, message: "Project updated successfully" });
     } catch (error) {
-        console.error("Error updating project:", error);
-        return res.status(500).json({ success: false, message: "Error updating project data" });
+      console.error("Error updating project:", error);
+      return res.status(500).json({ success: false, message: "Error updating project data" });
     }
-};
+  };
+  
 
 // Delete Project Data
 const deleteProjectData = async (req, res) => {
@@ -107,6 +155,7 @@ const deleteProjectData = async (req, res) => {
                 }]
             }
         });
+
 
         return res.status(200).json({ success: true, message: "Project deleted successfully" });
     } catch (error) {

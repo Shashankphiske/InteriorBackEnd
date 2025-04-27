@@ -11,5 +11,5 @@
 [[headers]]
   for = "/*"
 [headers.values]
-  Access-Control-Allow-Origin = "http://localhost:5173"
+  Access-Control-Allow-Origin = "https://furnishkaro.netlify.app/"
   Access-Control-Allow-Credentials = "true"
