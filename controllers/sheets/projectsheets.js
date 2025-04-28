@@ -31,7 +31,7 @@ const sendProjectData = async (req, res) => {
     try {
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
-            range: "AllProjects!A:Q",
+            range: "AllProjects!A:R",
             valueInputOption: "RAW",
             insertDataOption: "INSERT_ROWS",
             requestBody: {
@@ -117,7 +117,7 @@ const updateProjectValues = async (req, res) => {
   
       await sheets.spreadsheets.values.update({
         spreadsheetId: sheetId,
-        range: `AllProjects!A${rowIndex + 1}:Q${rowIndex + 1}`,
+        range: `AllProjects!A${rowIndex + 1}:R${rowIndex + 1}`,
         valueInputOption: "RAW",
         resource: { values: [updatedRow] },
       });
