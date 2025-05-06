@@ -22,6 +22,8 @@ const { getCatalogues, addCatalogue, deleteCatalogue, updateCatalogue } = requir
 const { getTasks, addTask, updateTask, deleteTask } = require("../../controllers/sheets/Task Sheets/tasksheet");
 const { fetchPaymentData, updatePaymentData, sendPaymentData, deletePaymentData } = require("../../controllers/sheets/paymentsheet");
 const { getAllAreas, sendAllAreas, deleteAreasData } = require("../../controllers/sheets/areas");
+const { sendCompanyData, deleteCompanyData, getCompanyData } = require("../../controllers/companysheet");
+const { getDesignData, sendDesignData, deleteDesignData } = require("../../controllers/designnosheet");
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -160,5 +162,13 @@ app.post("/.netlify/functions/server/deletePayment", deletePaymentData);
 app.get("/.netlify/functions/server/getAreas", getAllAreas);
 app.post("/.netlify/functions/server/addArea", sendAllAreas);
 app.post("/.netlify/functions/server/deleteArea", deleteAreasData);
+
+app.post("/.netlify/functions/server/sendCompany", sendCompanyData);
+app.post("/.netlify/functions/server/deleteCompany", deleteCompanyData);
+app.get("/.netlify/functions/server/getCompany", getCompanyData);
+
+app.get("/.netlify/functions/server/getDesign", getDesignData);
+app.post("/.netlify/functions/server/sendDesign", sendDesignData);
+app.post("/.netlify/functions/server/deleteDesign", deleteDesignData);
 
 module.exports.handler = serverless(app); 
