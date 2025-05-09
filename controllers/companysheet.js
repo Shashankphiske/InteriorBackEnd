@@ -15,9 +15,9 @@ const fetchCompanyData = async () => {
 };
 
 const sendCompanyData = async (req, res) => {
-    const { compnayName, date } = req.body;
+    const { companyName, date } = req.body;
 
-    if (![compnayName, date].every(Boolean)) {
+    if (![companyName, date].every(Boolean)) {
         return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
@@ -29,7 +29,7 @@ const sendCompanyData = async (req, res) => {
             range,
             valueInputOption: "RAW",
             insertDataOption: "INSERT_ROWS",
-            requestBody: { values: [[compnayName, date]] },
+            requestBody: { values: [[companyName, date]] },
         });
 
         return res.status(200).json({ success: true, message: "Compnay data inserted successfully" });
@@ -53,15 +53,15 @@ const getCompanyData = async (req, res) => {
 };
 
 const deleteCompanyData = async (req, res) => {
-    const { compnayName } = req.body;
+    const { companyName } = req.body;
 
-    if (!compnayName) {
+    if (!companyName) {
         return res.status(400).json({ success: false, message: "Name is required for deletion" });
     }
 
     try {
         const rows = await fetchCustomerData();
-        const rowIndex = rows.findIndex(row => row[0] === compnayName); // Find index based on name
+        const rowIndex = rows.findIndex(row => row[0] === companyName); // Find index based on name
 
         if (rowIndex === -1) {
             return res.status(400).json({ success: false, message: "User not found" });

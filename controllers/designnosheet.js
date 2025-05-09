@@ -41,7 +41,7 @@ const sendDesignData = async (req, res) => {
 
 const getDesignData = async (req, res) => {
     try {
-        const rows = await fetchCustomerData();
+        const rows = await fetchDesignData();
         if (!rows.length) {
             return res.status(400).json({ success: false, message: "No user data found" });
         }
@@ -53,7 +53,7 @@ const getDesignData = async (req, res) => {
 };
 
 const deleteDesignData = async (req, res) => {
-    const { compnayName } = req.body;
+    const { designName } = req.body;
 
     if (!designName) {
         return res.status(400).json({ success: false, message: "Name is required for deletion" });
