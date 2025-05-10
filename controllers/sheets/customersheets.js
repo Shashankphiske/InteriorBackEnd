@@ -106,7 +106,7 @@ const updateCustomerData = async (req, res) => {
     }
 
     try {
-        const data = await fetchTaskData(); // Fetch all tasks
+        const data = await fetchCustomerData(); // Fetch all tasks
         let index = -1;
 
         for (let i = 0; i < data.length; i++) {
