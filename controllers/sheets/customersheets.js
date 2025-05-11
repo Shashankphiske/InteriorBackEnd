@@ -110,7 +110,7 @@ const updateCustomerData = async (req, res) => {
         let index = -1;
 
         for (let i = 0; i < data.length; i++) {
-            if (data[i][0] === title) {
+            if (data[i][0] == name) {
                 index = i;
                 break;
             }
@@ -134,7 +134,7 @@ const updateCustomerData = async (req, res) => {
 
         await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
-            range: `Tasks!A${index + 1}:F${index + 1}`,
+            range: `CustomerData!A${index + 1}:F${index + 1}`,
             valueInputOption: "RAW",
             resource: { values: [updatedCustomer] },
         });
