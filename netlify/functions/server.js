@@ -30,6 +30,8 @@ const corsOptions = {
     const allowedOrigins = [
       "https://furnishkaro.netlify.app",
       "http://localhost:5173",
+      "http://51.21.200.25",
+      "https://51.21.200.25"
     ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);

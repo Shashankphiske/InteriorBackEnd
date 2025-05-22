@@ -3,12 +3,12 @@ require("dotenv").config();
 
 const sheetId = process.env.productsheetid;
 
-const range = "ProductGroup!A:E";
+const range = "ProductGroup!A:D";
 
 const addProductGroup = async (req, res) => {
-    const { groupName, mainProducts, addonProducts, color, needsTailoring } = req.body;
+    const { groupName, mainProducts, addonProducts, status } = req.body;
 
-    if(!groupName || !mainProducts || !addonProducts || !color || !needsTailoring){
+    if(!groupName || !mainProducts || !addonProducts || !status){
         return res.status(400).json({
             success : false,
             message : "All fields are required",
@@ -21,7 +21,7 @@ const addProductGroup = async (req, res) => {
         valueInputOption : "RAW",
         insertDataOption : "INSERT_ROWS",
         requestBody : {
-            values : [[ groupName, mainProducts, addonProducts, color, needsTailoring ]],
+            values : [[ groupName, mainProducts, addonProducts, status ]],
         }
     });
 
@@ -96,7 +96,7 @@ const deleteProductGroup = async (req, res) => {
 }
 
 const updateProductGroup = async (req, res) => {
-    const { groupName, mainProducts, addonProducts, color, needsTailoring } = req.body;
+    const { groupName, mainProducts, addonProducts, status } = req.body;
 
     if(!groupName){
         return res.status(400).json({
@@ -141,11 +141,10 @@ const updateProductGroup = async (req, res) => {
         groupName,
         mainProducts ?? row[1],
         addonProducts ?? row[2],
-        color ?? row[3],
-        needsTailoring ?? row[4],
+        status ?? row[3]
     ];
 
-    const newrange = `ProductGroup!A${index}:E${index}`;
+    const newrange = `ProductGroup!A${index}:D${index}`;
 
     await sheets.spreadsheets.values.update({
         spreadsheetId : sheetId,

@@ -3,12 +3,12 @@ require("dotenv").config();
 
 const sheetId = process.env.productsheetid;
 
-const range = "IndividualProducts!A:F";
+const range = "IndividualProducts!A:H";
 
 const addNewProduct = async (req, res) => {
-    const { productName, description, groupTypes, sellingUnit, mrp, taxRate }=req.body;
+    const { productName, description, groupTypes, sellingUnit, mrp, taxRate, date, needsTailoring }=req.body;
 
-    if(!productName || !description || !groupTypes || !sellingUnit || !mrp || !taxRate){
+    if(!productName || !description || !groupTypes || !sellingUnit || !mrp || !taxRate || !date || !needsTailoring){
         return res.status(400).json({
             success : false,
             message : "All fields are required",
@@ -21,7 +21,7 @@ const addNewProduct = async (req, res) => {
         valueInputOption : "RAW",
         insertDataOption : "INSERT_ROWS",
         requestBody : {
-            values : [[productName, description, groupTypes, sellingUnit, mrp, taxRate]],
+            values : [[productName, description, groupTypes, sellingUnit, mrp, taxRate, date, needsTailoring]],
         }
     });
 
@@ -94,7 +94,7 @@ const deleteSingleProduct = async (req, res) => {
 }
 
 const updateSingleProduct = async (req, res) => {
-    const { productName, description, groupTypes, sellingUnit, mrp, taxRate }=req.body;
+    const { productName, description, groupTypes, sellingUnit, mrp, taxRate, date, needsTailoring }=req.body;
 
     if(!productName){
         return res.status(400).json({
@@ -142,11 +142,13 @@ const updateSingleProduct = async (req, res) => {
         sellingUnit ?? row[3],
         mrp ?? row[4],
         taxRate ?? row[5],
+        date ?? row[6],
+        needsTailoring ?? row[7]
     ]
 
     await sheets.spreadsheets.values.update({
         spreadsheetId : sheetId,
-        range : `IndividualProducts!A${rowindex}:F${rowindex}`,
+        range : `IndividualProducts!A${rowindex}:H${rowindex}`,
         valueInputOption : "RAW",
         resource : { values : [updatedrow] }
     });

@@ -19,7 +19,7 @@ const fetchTaskData = async () => {
 const addTask = async (req, res) => {
     const { title, description, dateTime, date, assigneeLink, projectLink, priority, status } = req.body;
 
-    if (![title, description, dateTime, date, assigneeLink, projectLink, priority, status].every(Boolean)) {
+    if (![title, description, dateTime, date, projectLink, priority, status].every(Boolean)) {
         return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
