@@ -8,7 +8,7 @@ const sheetId = process.env.cataloguesheetid;
 const addCatalogue = async (req, res) => {
     const { catalogueName, description } = req.body;
 
-    if(!catalogueName || !description){
+    if(!catalogueName){
         return res.status(400).json({
             success : false,
             message : "All fields are required",
