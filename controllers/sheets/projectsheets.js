@@ -27,7 +27,11 @@ const sendProjectData = async (req, res) => {
     const { projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress } = req.body;
     console.log(projectName);
     console.log(req.body);
-
+    
+    if(!projectName){
+      return res.status(400).json({ success : false, message : "Project name is required" });
+    }
+    
     try {
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,

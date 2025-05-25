@@ -8,7 +8,7 @@ const sheetId = process.env.tailorsheetid;
 const addTailor = async (req, res) => {
     const { tailorName, phoneNumber, email, address } = req.body;
 
-    if(!tailorName || !phoneNumber || !email || !address){
+    if(!tailorName){
         return res.status(400).json({
             success : false,
             message : "All fields are required",

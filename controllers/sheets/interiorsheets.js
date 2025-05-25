@@ -54,7 +54,7 @@ const updateInteriorData = async (req, res) => {
 const sendInteriorData = async (req, res) => {
     const { name, email, phonenumber, address } = req.body;
 
-    if (![name, email, phonenumber, address].every(Boolean)) {
+    if (![name].every(Boolean)) {
         return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
