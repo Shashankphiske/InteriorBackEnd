@@ -2,7 +2,7 @@ const { sheets } = require("../../db/googleuser");
 require("dotenv").config();
 
 const sheetId = process.env.customerSheetId;
-const range = "CustomerData!A:F";
+const range = "CustomerData!A:H";
 
 // Utility function to fetch all customer data
 const fetchCustomerData = async () => {
@@ -23,7 +23,7 @@ const getCustomerSerial = async () => {
 
 // Add a new customer entry
 const sendCustomerData = async (req, res) => {
-    const { name, phonenumber, email, address, alternatenumber, addedDate } = req.body;
+    const { name, phonenumber, email, address, alternatenumber, addedDate, companyName, GST } = req.body;
 
     if (![name, phonenumber, address].every(Boolean)) {
         return res.status(400).json({ success: false, message: "All fields are required" });
@@ -37,7 +37,7 @@ const sendCustomerData = async (req, res) => {
             range,
             valueInputOption: "RAW",
             insertDataOption: "INSERT_ROWS",
-            requestBody: { values: [[name, phonenumber, email, address, alternatenumber, addedDate]] },
+            requestBody: { values: [[name, phonenumber, email, address, alternatenumber, addedDate, companyName, GST]] },
         });
 
         return res.status(200).json({ success: true, message: "Customer data inserted successfully" });
@@ -96,7 +96,7 @@ const deleteCustomerData = async (req, res) => {
 };
 
 const updateCustomerData = async (req, res) => {
-    const { name, phonenumber, email, address, alternatenumber, addedDate } = req.body;
+    const { name, phonenumber, email, address, alternatenumber, addedDate, companyName, GST } = req.body;
 
     if (!name) {
         return res.status(400).json({
@@ -129,19 +129,21 @@ const updateCustomerData = async (req, res) => {
             email ?? data[index][2],
             address ?? data[index][2],
             alternatenumber ?? data[index][3],
-            addedDate ?? data[index][4]
+            addedDate ?? data[index][4],
+            companyName ?? data[index][5],
+            GST ?? data[index][6]
         ];
 
         await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
-            range: `CustomerData!A${index + 1}:F${index + 1}`,
+            range: `CustomerData!A${index + 1}:H${index + 1}`,
             valueInputOption: "RAW",
             resource: { values: [updatedCustomer] },
         });
 
         return res.status(200).json({
             success: true,
-            message: "Custoemr updated successfully",
+            message: "Customer updated successfully",
         });
     } catch (error) {
         console.error("Error updating task:", error);
