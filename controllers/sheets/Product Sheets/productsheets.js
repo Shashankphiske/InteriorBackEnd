@@ -6,7 +6,7 @@ const sheetId = process.env.productsheetid;
 const range = "IndividualProducts!A:H";
 
 const addNewProduct = async (req, res) => {
-    const { productName, description, groupTypes, sellingUnit, mrp, taxRate, date, needsTailoring }=req.body;
+    const { productName, description, groupTypes, sellingUnit, mrp, taxRate, date, needsTailoring } = req.body;
 
     if(!productName || !groupTypes || !sellingUnit || !mrp || !taxRate || !date){
         return res.status(400).json({
