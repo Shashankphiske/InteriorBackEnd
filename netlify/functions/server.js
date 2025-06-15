@@ -24,6 +24,7 @@ const { fetchPaymentData, updatePaymentData, sendPaymentData, deletePaymentData 
 const { getAllAreas, sendAllAreas, deleteAreasData } = require("../../controllers/sheets/areas");
 const { sendCompanyData, deleteCompanyData, getCompanyData } = require("../../controllers/companysheet");
 const { getDesignData, sendDesignData, deleteDesignData } = require("../../controllers/designnosheet");
+const { sendInquiryData, fetchInquiryData } = require("../../controllers/inquirysheet");
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -172,5 +173,8 @@ app.get("/.netlify/functions/server/getCompany", getCompanyData);
 app.get("/.netlify/functions/server/getDesign", getDesignData);
 app.post("/.netlify/functions/server/sendDesign", sendDesignData);
 app.post("/.netlify/functions/server/deleteDesign", deleteDesignData);
+
+app.get("/.netlify/functions/server/getInquiry", fetchInquiryData);
+app.post("/.netlify/functions/server/sendInquiry", sendInquiryData);
 
 module.exports.handler = serverless(app); 
