@@ -2,7 +2,7 @@ const { sheets } = require("../db/googleuser");
 require("dotenv").config;
 
 const sheetId = "1G98mY1kooSP4ouckUg0uye0IoAOw6e63Almt6wt55d0";
-const range = "Sheet1!A:E";
+const range = "Sheet1!A:F";
 
 const fetchInquiryData = async (req, res) => {
     try {
@@ -21,7 +21,7 @@ const fetchInquiryData = async (req, res) => {
 };
 
 const sendInquiryData = async (req, res) => {
-    const { projectName, comment, inquiryDate, projectDate, status } = req.body;
+    const { projectName, comment, inquiryDate, projectDate, status, customer } = req.body;
 
     if (![projectName].every(Boolean)) {
         return res.status(400).json({ success: false, message: "All fields are required" });
@@ -33,7 +33,7 @@ const sendInquiryData = async (req, res) => {
             range,
             valueInputOption: "RAW",
             insertDataOption: "INSERT_ROWS",
-            requestBody: { values: [[projectName, comment, inquiryDate, projectDate, status]] },
+            requestBody: { values: [[projectName, comment, inquiryDate, projectDate, status, customer]] },
         });
 
         return res.status(200).json({ success: true, message: "Data sent successfully" });
@@ -43,4 +43,132 @@ const sendInquiryData = async (req, res) => {
     }
 };
 
-module.exports = { fetchInquiryData, sendInquiryData }
+const updateInquiry = async (req, res) => {
+    const { projectName, status } = req.body;
+
+    if(!projectName){
+        return res.status(400).json({
+            success : false,
+            message : "project name is required",
+        });
+    }
+
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId : sheetId,
+        range,
+    });
+
+    const rows = response.data.values;
+
+    if(rows == undefined){
+        return res.status(400).json({
+            success : false,
+            message : "no data found in inquiry database",
+        });
+    }
+
+    let row = -1;
+    let index = -1;
+    for(let i = 0; i < rows.length; i++){
+        if(rows[i][0] == projectName){
+            index = i + 1;
+            row = rows[i];
+            break;
+        }
+    }
+
+    if(index == -1){
+        return res.status(400).json({
+            success : false,
+            message : `No inquiry with the name ${projectName} found`,
+        });
+    }
+
+    const newrow = [
+        projectName,
+        row[1],
+        row[2],
+        row[3],
+        status ?? row[4],
+        row[5]
+    ];
+
+    await sheets.spreadsheets.values.update({
+        spreadsheetId : sheetId,
+        range : `Sheet1!A${index}:F${index}`,
+        valueInputOption : "RAW",
+        resource : {
+            values : [newrow],
+        }
+    });
+
+    return res.status(200).json({
+        success : true,
+        message : `Updated ${projectName}`,
+    });
+}
+
+const deleteInquiry = async (req, res) => {
+    const { projectName } = req.body;
+
+    if(!projectName){
+        return res.status(400).json({
+            success : false,
+            message : "Project name is required",
+        });
+    }
+
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId : sheetId,
+        range : range,
+    });
+
+    const rows = response.data.values;
+    if(rows == undefined){
+        return res.status(400).json({
+            success : false,
+            message : "No data available in Inquiry database",
+        });
+    }
+
+    let index = -1;
+
+    for(let i = 0; i < rows.length; i++){
+        if(rows[i][0] == projectName){
+            index = i;
+            break;
+        }
+    }
+
+    if(index == -1){
+        return res.status(400).json({
+            success : false,
+            message : `No Inquiry with the name : ${projectName} found`,
+        });
+    }
+
+    await sheets.spreadsheets.batchUpdate({
+        spreadsheetId : sheetId,
+        resource : {
+            requests : [
+                {
+                    deleteDimension : {
+                        range : {
+                            sheetId : 0,
+                            dimension : "ROWS",
+                            startIndex : index,
+                            endIndex : index + 1,
+                        }
+                    }
+                }
+            ]
+        }
+    });
+
+    return res.status(200).json({
+        success : true,
+        message : "Inquiry deleted",
+    });
+}
+
+module.exports = { fetchInquiryData, sendInquiryData, updateInquiry, deleteInquiry }
