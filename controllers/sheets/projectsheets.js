@@ -12,7 +12,7 @@ const sheets = google.sheets({ version: "v4", auth });
 const getAllProjectData = async () => {
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: sheetId,
-        range: "AllProjects!A:S",
+        range: "AllProjects!A:T",
     });
     return response.data.values;
 };
@@ -24,7 +24,7 @@ const findRowIndex = (rows, projectName) => {
 
 // Send Project Data (Insert)
 const sendProjectData = async (req, res) => {
-    const { projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress, date } = req.body;
+    const { projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress, date, grandTotal } = req.body;
     console.log(projectName);
     console.log(req.body);
     
@@ -35,11 +35,11 @@ const sendProjectData = async (req, res) => {
     try {
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
-            range: "AllProjects!A:S",
+            range: "AllProjects!A:T",
             valueInputOption: "RAW",
             insertDataOption: "INSERT_ROWS",
             requestBody: {
-                values: [[projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress, date]],
+                values: [[projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress, date, grandTotal]],
             },
         });
 
@@ -96,6 +96,7 @@ const updateProjectValues = async (req, res) => {
         tailorsArray: 16,
         projectAddress : 17,
         date : 18,
+        grandTotal : 19
       };
   
       const currentRow = rows[rowIndex];
@@ -122,7 +123,7 @@ const updateProjectValues = async (req, res) => {
   
       await sheets.spreadsheets.values.update({
         spreadsheetId: sheetId,
-        range: `AllProjects!A${rowIndex + 1}:S${rowIndex + 1}`,
+        range: `AllProjects!A${rowIndex + 1}:T${rowIndex + 1}`,
         valueInputOption: "RAW",
         resource: { values: [updatedRow] },
       });
