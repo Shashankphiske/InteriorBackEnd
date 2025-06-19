@@ -12,7 +12,7 @@ const sheets = google.sheets({ version: "v4", auth });
 const getAllProjectData = async () => {
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: sheetId,
-        range: "AllProjects!A:T",
+        range: "AllProjects!A:U",
     });
     return response.data.values;
 };
@@ -24,9 +24,7 @@ const findRowIndex = (rows, projectName) => {
 
 // Send Project Data (Insert)
 const sendProjectData = async (req, res) => {
-    const { projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress, date, grandTotal } = req.body;
-    console.log(projectName);
-    console.log(req.body);
+    const { projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress, date, grandTotal, discountType } = req.body;
     
     if(!projectName){
       return res.status(400).json({ success : false, message : "Project name is required" });
@@ -35,11 +33,11 @@ const sendProjectData = async (req, res) => {
     try {
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
-            range: "AllProjects!A:T",
+            range: "AllProjects!A:U",
             valueInputOption: "RAW",
             insertDataOption: "INSERT_ROWS",
             requestBody: {
-                values: [[projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress, date, grandTotal]],
+                values: [[projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress, date, grandTotal, discountType]],
             },
         });
 
@@ -64,8 +62,6 @@ const getProjectData = async (req, res) => {
 // Update Project Values
 const updateProjectValues = async (req, res) => {
     const { projectName, ...updatedFields } = req.body;
-    console.log(projectName);
-    console.log(req.body);
   
     if (!projectName)
       return res.status(400).json({ success: false, message: "Project name needed to update values" });
@@ -96,7 +92,8 @@ const updateProjectValues = async (req, res) => {
         tailorsArray: 16,
         projectAddress : 17,
         date : 18,
-        grandTotal : 19
+        grandTotal : 19,
+        discountType : 20
       };
   
       const currentRow = rows[rowIndex];
@@ -123,7 +120,7 @@ const updateProjectValues = async (req, res) => {
   
       await sheets.spreadsheets.values.update({
         spreadsheetId: sheetId,
-        range: `AllProjects!A${rowIndex + 1}:T${rowIndex + 1}`,
+        range: `AllProjects!A${rowIndex + 1}:U${rowIndex + 1}`,
         valueInputOption: "RAW",
         resource: { values: [updatedRow] },
       });
@@ -135,6 +132,35 @@ const updateProjectValues = async (req, res) => {
     }
   };
   
+const updateProjectPayment = async (req, res) => {
+  const { projectName, paid } = req.body;
+
+  if (!projectName)
+    return res.status(400).json({ success: false, message: "Project name needed to update values" });
+
+  try {
+    const rows = await getAllProjectData();
+    const rowIndex = findRowIndex(rows, projectName);
+    
+    if (rowIndex === -1)
+      return res.status(400).json({ success: false, message: "Project not found" });
+
+    // 'paid' is at column index 6 (G column)
+    const targetCell = `AllProjects!G${rowIndex + 1}`;
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: targetCell,
+      valueInputOption: "RAW",
+      resource: { values: [[paid]] },
+    });
+
+    return res.status(200).json({ success: true, message: "Paid amount updated successfully" });
+  } catch (error) {
+    console.error("Error updating paid field:", error);
+    return res.status(500).json({ success: false, message: "Error updating paid field" });
+  }
+};
 
 // Delete Project Data
 const deleteProjectData = async (req, res) => {
@@ -170,4 +196,4 @@ const deleteProjectData = async (req, res) => {
     }
 };
 
-module.exports = { sendProjectData, getProjectData, updateProjectValues, deleteProjectData };
+module.exports = { sendProjectData, getProjectData, updateProjectValues, deleteProjectData, updateProjectPayment };

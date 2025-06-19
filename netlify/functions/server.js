@@ -8,7 +8,7 @@ const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const cors = require("cors");
 const { checkAuth, checkAuthLogout } = require("../../controllers/auth.checkUser");
-const { sendProjectData, getProjectData, updateProjectValues, deleteProjectData } = require("../../controllers/sheets/projectsheets");
+const { sendProjectData, getProjectData, updateProjectValues, deleteProjectData, updateProjectPayment } = require("../../controllers/sheets/projectsheets");
 const { sendCustomerData, deleteCustomerData, getCustomerData, updateCustomerData } = require("../../controllers/sheets/customersheets");
 const { sendInteriorData, getInteriorData, deleteInteriorData, updateInteriorData } = require("../../controllers/sheets/interiorsheets");
 const { sendSalesAssociateData, getSalesAssociateData, deleteSalesAssociateData, updateSalesAssociateData } = require("../../controllers/sheets/salesAssociatesheets");
@@ -91,6 +91,7 @@ app.post("/.netlify/functions/server/sendprojectdata", sendProjectData);
 app.get("/.netlify/functions/server/getprojectdata", getProjectData);
 app.post("/.netlify/functions/server/updateprojectdata", updateProjectValues);
 app.post("/.netlify/functions/server/deleteprojectdata", deleteProjectData);
+app.post("/.netlify/functions/server/updateprojectpayment", updateProjectPayment);
 
 //customerdata routes
 app.post("/.netlify/functions/server/sendcustomerdata", sendCustomerData);
