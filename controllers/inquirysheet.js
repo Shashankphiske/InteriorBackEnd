@@ -2,7 +2,7 @@ const { sheets } = require("../db/googleuser");
 require("dotenv").config;
 
 const sheetId = "1G98mY1kooSP4ouckUg0uye0IoAOw6e63Almt6wt55d0";
-const range = "Sheet1!A:F";
+const range = "Sheet1!A:G";
 
 const fetchInquiryData = async (req, res) => {
     try {
@@ -21,7 +21,7 @@ const fetchInquiryData = async (req, res) => {
 };
 
 const sendInquiryData = async (req, res) => {
-    const { projectName, comment, inquiryDate, projectDate, status, customer } = req.body;
+    const { projectName, phonenumber, comment, inquiryDate, projectDate, status, customer } = req.body;
 
     if (![projectName].every(Boolean)) {
         return res.status(400).json({ success: false, message: "All fields are required" });
@@ -33,7 +33,7 @@ const sendInquiryData = async (req, res) => {
             range,
             valueInputOption: "RAW",
             insertDataOption: "INSERT_ROWS",
-            requestBody: { values: [[projectName, comment, inquiryDate, projectDate, status, customer]] },
+            requestBody: { values: [[projectName, phonenumber, comment, inquiryDate, projectDate, status, customer]] },
         });
 
         return res.status(200).json({ success: true, message: "Data sent successfully" });
@@ -89,13 +89,14 @@ const updateInquiry = async (req, res) => {
         row[1],
         row[2],
         row[3],
-        status ?? row[4],
-        row[5]
+        row[4],
+        status ?? row[5],
+        row[6]
     ];
 
     await sheets.spreadsheets.values.update({
         spreadsheetId : sheetId,
-        range : `Sheet1!A${index}:F${index}`,
+        range : `Sheet1!A${index}:G${index}`,
         valueInputOption : "RAW",
         resource : {
             values : [newrow],

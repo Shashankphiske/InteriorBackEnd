@@ -8,7 +8,9 @@ const range = "ProductGroup!A:D";
 const addProductGroup = async (req, res) => {
     const { groupName, mainProducts, addonProducts, status } = req.body;
 
-    if(!groupName || !mainProducts || !addonProducts || !status){
+
+
+    if(!groupName || !mainProducts || !addonProducts){
         return res.status(400).json({
             success : false,
             message : "All fields are required",

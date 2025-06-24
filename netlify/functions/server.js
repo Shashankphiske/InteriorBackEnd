@@ -77,11 +77,6 @@ app.get("/.netlify/functions/server", (req, res) => {
   res.send("App running");
 });
 
-
-app.all("/", (req, res, next) => {
-  
-})
-
 app.use("/.netlify/functions/server/auth", loginrouter);
 
 app.get("/.netlify/functions/server/checkAuth", checkAuth);
@@ -135,12 +130,6 @@ app.post("/.netlify/functions/server/addstore", addStore);
 app.post("/.netlify/functions/server/deletestore", deleteStore);
 app.post("/.netlify/functions/server/updatestore", updateStores);
 
-//tailors database routes
-app.get("/.netlify/functions/server/gettailors", getAllTailors);
-app.post("/.netlify/functions/server/addtailor", addTailor);
-app.post("/.netlify/functions/server/deletetailor", deleteTailor);
-app.post("/.netlify/functions/server/updatetailor", updateTailor);
-
 // brand routes
 app.get("/.netlify/functions/server/getbrands", getBrands);
 app.post("/.netlify/functions/server/addbrand", addBrand);
@@ -158,6 +147,12 @@ app.get("/.netlify/functions/server/gettasks", getTasks);
 app.post("/.netlify/functions/server/addtask", addTask);
 app.post("/.netlify/functions/server/updatetask", updateTask);
 app.post("/.netlify/functions/server/deletetask", deleteTask);
+
+//tailors database routes
+app.get("/.netlify/functions/server/gettailors", getAllTailors);
+app.post("/.netlify/functions/server/addtailor", addTailor);
+app.post("/.netlify/functions/server/deletetailor", deleteTailor);
+app.post("/.netlify/functions/server/updatetailor", updateTailor);
 
 // payment routes
 app.get("/.netlify/functions/server/getPayments", fetchPaymentData);
@@ -181,5 +176,10 @@ app.get("/.netlify/functions/server/getInquiry", fetchInquiryData);
 app.post("/.netlify/functions/server/sendInquiry", sendInquiryData);
 app.post("/.netlify/functions/server/updateInquiry", updateInquiry);
 app.post("/.netlify/functions/server/deleteInquiry", deleteInquiry);
+
+app.get("/.netlify/functions/server/getAllPaints", fetchInquiryData);
+app.post("/.netlify/functions/server/sendNewPaint", sendInquiryData);
+app.post("/.netlify/functions/server/updatePaint", updateInquiry);
+app.post("/.netlify/functions/server/deletePaint", deleteInquiry);
 
 module.exports.handler = serverless(app); 
