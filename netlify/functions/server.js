@@ -25,6 +25,7 @@ const { getAllAreas, sendAllAreas, deleteAreasData } = require("../../controller
 const { sendCompanyData, deleteCompanyData, getCompanyData } = require("../../controllers/companysheet");
 const { getDesignData, sendDesignData, deleteDesignData } = require("../../controllers/designnosheet");
 const { sendInquiryData, fetchInquiryData, updateInquiry, deleteInquiry } = require("../../controllers/inquirysheet");
+const { getBankDetails, sendBankData, updateBankData, deleteBankData } = require("../../controllers/sheets/bankdetails");
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -181,5 +182,10 @@ app.get("/.netlify/functions/server/getAllPaints", fetchInquiryData);
 app.post("/.netlify/functions/server/sendNewPaint", sendInquiryData);
 app.post("/.netlify/functions/server/updatePaint", updateInquiry);
 app.post("/.netlify/functions/server/deletePaint", deleteInquiry);
+
+app.get("/.netlify/functions/server/getBankData", getBankDetails);
+app.post("/.netlify/functions/server/sendBankData", sendBankData);
+app.post("/.netlify/functions/server/updateBankData", updateBankData);
+app.post("/.netlify/functions/server/deleteBankData", deleteBankData);
 
 module.exports.handler = serverless(app); 
