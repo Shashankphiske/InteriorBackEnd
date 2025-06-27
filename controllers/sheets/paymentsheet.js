@@ -86,10 +86,18 @@ const deletePaymentData = async (req, res) => {
 
     try {
         const rows = await fetchPaymentsData();
-        const index = rows.findIndex(row => row[0] === customerName && row[1] === Name && row[2] == Received && row[3] == ReceivedDate && row[4] == PaymentMode && row[5] == Remarks); // Find index based on email
+        const index = rows.findIndex(row =>
+  (row[0]?.toLowerCase() === customerName?.toLowerCase()) &&
+  (row[1]?.toLowerCase() === Name?.toLowerCase()) &&
+  (row[2]?.toLowerCase() === Received?.toLowerCase()) &&
+  (row[3]?.toLowerCase() === ReceivedDate?.toLowerCase()) &&
+  (row[4]?.toLowerCase() === PaymentMode?.toLowerCase()) &&
+  (row[5]?.toLowerCase() === Remarks?.toLowerCase())
+);
+ // Find index based on email
 
         if (index === -1) {
-            return res.status(400).json({ success: false, message: "No Payment found" });
+            return res.status(400).json({ success: false, message: "No Payment found", data : rows });
         }
 
         await sheets.spreadsheets.batchUpdate({
