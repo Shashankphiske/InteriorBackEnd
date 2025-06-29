@@ -13,7 +13,7 @@ const { sendCustomerData, deleteCustomerData, getCustomerData, updateCustomerDat
 const { sendInteriorData, getInteriorData, deleteInteriorData, updateInteriorData } = require("../../controllers/sheets/interiorsheets");
 const { sendSalesAssociateData, getSalesAssociateData, deleteSalesAssociateData, updateSalesAssociateData } = require("../../controllers/sheets/salesAssociatesheets");
 const { addDataToArea, removeDataFromArea, getDataFromArea, updateDataOfArea } = require("../../controllers/sheets/Area Sheets/areasheets");
-const { addNewProduct, deleteSingleProduct, updateSingleProduct, getSingleProducts } = require("../../controllers/sheets/Product Sheets/productsheets");
+const { addNewProduct, deleteSingleProduct, updateSingleProduct, getSingleProducts, addImportedProducts } = require("../../controllers/sheets/Product Sheets/productsheets");
 const { addProductGroup, deleteProductGroup, updateProductGroup, getAllProductGroups } = require("../../controllers/sheets/Product Sheets/productgroupsheets");
 const { getAllStores, addStore, deleteStore, updateStores } = require("../../controllers/sheets/stores/storesheet");
 const { getAllTailors, addTailor, deleteTailor, updateTailor } = require("../../controllers/sheets/Tailor Sheets/tailorsheet");
@@ -119,6 +119,7 @@ app.post("/.netlify/functions/server/addnewproduct", addNewProduct);
 app.post("/.netlify/functions/server/deletesingleproduct", deleteSingleProduct);
 app.post("/.netlify/functions/server/updatesingleproduct", updateSingleProduct);
 app.get("/.netlify/functions/server/getsingleproducts", getSingleProducts);
+app.post("/.netlify/functions/server/importproducts", addImportedProducts);
 
 //productgroup routes
 app.post("/.netlify/functions/server/addproductgroup", addProductGroup);

@@ -32,6 +32,33 @@ const addNewProduct = async (req, res) => {
     });
 }
 
+const addImportedProducts = async (req, res) => {
+    const rows = req.body.items;
+
+    console.log(rows);
+
+    if(rows.length == 0){
+        return res.status(400).json({
+            success : false,
+            message : "no data sent",
+        });
+    }
+
+    const response = await sheets.spreadsheets.values.append({
+        spreadsheetId : sheetId,
+        range : range,
+        valueInputOption : "RAW",
+        requestBody : {
+            values : rows
+        }
+    });
+
+    return res.status(200).json({
+        success : true,
+        message : "Products Imported",
+    });
+}
+
 const deleteSingleProduct = async (req, res) => {
     const { productName } = req.body;
     if(!productName){
@@ -175,4 +202,4 @@ const getSingleProducts = async (req, res) => {
     });
 }
 
-module.exports = { addNewProduct, deleteSingleProduct, updateSingleProduct, getSingleProducts };
+module.exports = { addNewProduct, deleteSingleProduct, updateSingleProduct, getSingleProducts, addImportedProducts };
