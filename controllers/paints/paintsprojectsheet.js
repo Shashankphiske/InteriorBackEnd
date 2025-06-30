@@ -1,15 +1,15 @@
-const { google } = require("googleapis");
+const { sheets } = require("../../db/googleuser")
 require("dotenv").config();
 
 const credentials = require("../../credentials.json");
 
-const sheetId = "1MrNq308z4mQIZXOcxuyGj3SC0TwBePemwilZeLyQ9WI";
+const sheetId = "1K37eWeE5xExXluVc4G0HGAx9R9a9Tr-DkxtKmwmxylY";
 const scopes = ["https://www.googleapis.com/auth/spreadsheets"];
 const auth = new google.auth.JWT(process.env.client_email, null, process.env.private_key, scopes);
 const sheets = google.sheets({ version: "v4", auth });
 
 // Utility function to fetch all project data
-const getAllProjectData = async () => {
+const getPaintsAllProjectData = async () => {
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: sheetId,
         range: "AllProjects!A:W",
@@ -18,12 +18,12 @@ const getAllProjectData = async () => {
 };
 
 // Utility function to find row index by project name
-const findRowIndex = (rows, projectName) => {
+const findPaintsRowIndex = (rows, projectName) => {
     return rows.findIndex(row => row[0] === projectName);
 };
 
 // Send Project Data (Insert)
-const sendProjectData = async (req, res) => {
+const sendPaintsProjectData = async (req, res) => {
     const { projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress, date, grandTotal, discountType, bankDetails, termsConditions } = req.body;
     
     if(!projectName){
@@ -48,9 +48,9 @@ const sendProjectData = async (req, res) => {
     }
 };
 
-const getProjectData = async (req, res) => {
+const getPaintsProjectData = async (req, res) => {
     try {
-        const rows = await getAllProjectData();
+        const rows = await getPaintsAllProjectData();
         if (!rows) return res.status(400).json({ success: false, message: "No project data available" });
         return res.status(200).json({ success: true, message: "Data Fetched", body: rows });
     } catch (error) {
@@ -60,14 +60,14 @@ const getProjectData = async (req, res) => {
 };
 
 // Update Project Values
-const updateProjectValues = async (req, res) => {
+const updatePaintsProjectValues = async (req, res) => {
     const { projectName, ...updatedFields } = req.body;
   
     if (!projectName)
       return res.status(400).json({ success: false, message: "Project name needed to update values" });
   
     try {
-      const rows = await getAllProjectData();
+      const rows = await getPaintsAllProjectData();
       const rowIndex = findRowIndex(rows, projectName);
       if (rowIndex === -1)
         return res.status(400).json({ success: false, message: "Project not found" });
@@ -134,15 +134,15 @@ const updateProjectValues = async (req, res) => {
     }
   };
   
-const updateProjectPayment = async (req, res) => {
+const updatePaintsProjectPayment = async (req, res) => {
   const { projectName, paid } = req.body;
 
   if (!projectName)
     return res.status(400).json({ success: false, message: "Project name needed to update values" });
 
   try {
-    const rows = await getAllProjectData();
-    const rowIndex = findRowIndex(rows, projectName);
+    const rows = await getPaintsAllProjectData();
+    const rowIndex = findPaintsRowIndex(rows, projectName);
     
     if (rowIndex === -1)
       return res.status(400).json({ success: false, message: "Project not found" });
@@ -165,12 +165,12 @@ const updateProjectPayment = async (req, res) => {
 };
 
 // Delete Project Data
-const deleteProjectData = async (req, res) => {
+const deletePaintsProjectData = async (req, res) => {
     const { projectName } = req.body;
     if (!projectName) return res.status(400).json({ success: false, message: "Project name required" });
 
     try {
-        const rows = await getAllProjectData();
+        const rows = await getPaintsAllProjectData();
         const rowIndex = findRowIndex(rows, projectName);
         if (rowIndex === -1) return res.status(400).json({ success: false, message: "Project not found" });
 
@@ -198,4 +198,4 @@ const deleteProjectData = async (req, res) => {
     }
 };
 
-module.exports = { sendProjectData, getProjectData, updateProjectValues, deleteProjectData, updateProjectPayment };
+module.exports = { sendPaintsProjectData, getPaintsProjectData, updatePaintsProjectValues, deletePaintsProjectData, updatePaintsProjectPayment };
