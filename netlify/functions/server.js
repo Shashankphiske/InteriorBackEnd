@@ -42,6 +42,8 @@ const { sendPaintsSalesAssociateData, getPaintsSalesAssociateData, deletePaintsS
 const { sendPaintsInteriorData, getPaintsInteriorData, deletePaintsInteriorData, updatePaintsInteriorData } = require("../../controllers/paints/paintsinteriorshe");
 const { sendPaintsCustomerData, deletePaintsCustomerData, getPaintsCustomerData, updatePaintsCustomerData } = require("../../controllers/paints/paintscustomershee");
 const { sendPaintsProjectData, getPaintsProjectData, updatePaintsProjectValues, deletePaintsProjectData, updatePaintsProjectPayment } = require("../../controllers/paints/paintsprojectsheet");
+const { getPaintsLabourData, sendPaintsLabourData, deletePaintsLabourData } = require("../../controllers/paints/paintslaboursheet");
+const { getPaintsColorData, sendPaintsColorData, updatePaintsColorData, deletePaintsColorData } = require("../../controllers/paints/paintscolorsheet");
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -298,5 +300,16 @@ app.post("/.netlify/functions/server/deleteTermsData", deleteTermsData);
 app.get("/.netlify/functions/server/getPaintsTermsData", getPaintsBankDetails);
 app.post("/.netlify/functions/server/sendPaintsTermsData", sendPaintsInquiryData);
 app.post("/.netlify/functions/server/deletePaintsTermsData", deletePaintsInquiry);
+
+// paints labour details
+app.get("/.netlify/functions/server/getPaintsLabourData", getPaintsLabourData);
+app.post("/.netlify/functions/server/sendPaintsLabourData", sendPaintsLabourData);
+app.post("/.netlify/functions/server/deletePaintsLabourData", deletePaintsLabourData);
+
+// paints color data
+app.get("/.netlify/functions/server/getPaintsColorData", getPaintsColorData);
+app.post("/.netlify/functions/server/sendPaintsColorData", sendPaintsColorData);
+app.post("/.netlify/functions/server/updatePaintsColorData", updatePaintsColorData);
+app.post("/.netlify/functions/server/deletePaintsColorData", deletePaintsColorData);
 
 module.exports.handler = serverless(app); 

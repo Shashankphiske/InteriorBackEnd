@@ -1,4 +1,4 @@
-const { sheets } = require("../../db/googleuser")
+const { google } = require("googleapis");
 require("dotenv").config();
 
 const credentials = require("../../credentials.json");
