@@ -1,7 +1,7 @@
 const { sheets } = require("../../db/googleuser")
 require("dotenv").config();
 
-const sheetId = "1fA5R91MQ99_7Mes25oVexn6LOUV9jgrjS6Gxg20L8AY";
+const sheetId = "10jcHqOt1S4B1VpWzcd_dxbOLKeo_e7yi9JjZhqFH-mk";
 const range = "Sheet1!A:C";
 
 // Utility function to fetch all interior data
@@ -98,7 +98,7 @@ const deletePaintsColorData = async (req, res) => {
 
     try {
         const rows = await fetchPaintsColorData();
-        const index = rows.findIndex(row => row[0] === name); // Find index based on email
+        const index = rows.findIndex(row => row[0] === siteName); // Find index based on email
 
         if (index === -1) {
             return res.status(400).json({ success: false, message: "No row related to email found" });
