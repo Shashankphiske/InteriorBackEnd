@@ -19,7 +19,10 @@ const fetchPaintsTermsDetailsData = async () => {
 const sendPaintsTermsData = async (req, res) => {
     const { terms, date } = req.body;
 
-    if (![terms, date].every(Boolean)) {
+    console.log(terms);
+    console.log(date);
+
+    if (!terms && !date) {
         return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
@@ -44,7 +47,7 @@ const getPaintsTermsDetails = async (req, res) => {
     try {
         const rows = await fetchPaintsTermsDetailsData();
         if (!rows.length) {
-            return res.status(400).json({ success: false, message: "No terms data found" });
+            return res.status(200).json({ success: false, message: "No terms data found" });
         }
         return res.status(200).json({ success: true, message: "Data fetched successfully", body: rows });
     } catch (error) {

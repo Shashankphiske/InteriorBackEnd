@@ -51,7 +51,7 @@ const sendPaintsProjectData = async (req, res) => {
 const getPaintsProjectData = async (req, res) => {
     try {
         const rows = await getPaintsAllProjectData();
-        if (!rows) return res.status(400).json({ success: false, message: "No project data available" });
+        if (!rows) return res.status(200).json({ success: false, message: "No project data available" });
         return res.status(200).json({ success: true, message: "Data Fetched", body: rows });
     } catch (error) {
         console.error("Error retrieving project data:", error);
@@ -68,7 +68,7 @@ const updatePaintsProjectValues = async (req, res) => {
   
     try {
       const rows = await getPaintsAllProjectData();
-      const rowIndex = findRowIndex(rows, projectName);
+      const rowIndex = findPaintsRowIndex(rows, projectName);
       if (rowIndex === -1)
         return res.status(400).json({ success: false, message: "Project not found" });
   
@@ -171,7 +171,7 @@ const deletePaintsProjectData = async (req, res) => {
 
     try {
         const rows = await getPaintsAllProjectData();
-        const rowIndex = findRowIndex(rows, projectName);
+        const rowIndex = findPaintsRowIndex(rows, projectName);
         if (rowIndex === -1) return res.status(400).json({ success: false, message: "Project not found" });
 
         await sheets.spreadsheets.batchUpdate({

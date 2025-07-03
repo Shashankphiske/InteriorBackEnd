@@ -43,7 +43,7 @@ const getPaintsCompanyData = async (req, res) => {
     try {
         const rows = await fetchPaintsCompanyData();
         if (!rows.length) {
-            return res.status(400).json({ success: false, message: "No user data found" });
+            return res.status(200).json({ success: false, message: "No user data found" });
         }
         return res.status(200).json({ success: true, message: "Customer data fetched successfully", body: rows });
     } catch (error) {

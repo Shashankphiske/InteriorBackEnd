@@ -79,7 +79,7 @@ const getPaintsBankDetails = async (req, res) => {
     try {
         const rows = await fetchPaintsBankDetailsData();
         if (!rows.length) {
-            return res.status(400).json({ success: false, message: "No bank data found" });
+            return res.status(200).json({ success: false, message: "No bank data found" });
         }
         return res.status(200).json({ success: true, message: "Data fetched successfully", body: rows });
     } catch (error) {

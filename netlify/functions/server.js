@@ -28,7 +28,7 @@ const { sendInquiryData, fetchInquiryData, updateInquiry, deleteInquiry } = requ
 const { getBankDetails, sendBankData, updateBankData, deleteBankData } = require("../../controllers/sheets/bankdetails");
 const { getTermsDetails, sendTermsData, deleteTermsData } = require("../../controllers/sheets/termsdetails");
 const { fetchPaintsInquiryData, sendPaintsInquiryData, updatePaintsInquiry, deletePaintsInquiry } = require("../../controllers/paints/paintsinquirysheet");
-const { getPaintsBankDetails } = require("../../controllers/paints/paintsbanksheet");
+const { getPaintsBankDetails, sendPaintsBankData, updatePaintsBankData, deletePaintsBankData } = require("../../controllers/paints/paintsbanksheet");
 const { getPaintsDesignData, sendPaintsDesignData, deletePaintsDesignData } = require("../../controllers/paints/paintsdesignsheet");
 const { sendPaintsCompanyData, deletePaintsCompanyData, getPaintsCompanyData } = require("../../controllers/paints/paintscompanysheet");
 const { getPaintsAllAreas, sendPaintsAllAreas, deletePaintsAreasData } = require("../../controllers/paints/paintsareas");
@@ -45,6 +45,7 @@ const { sendPaintsProjectData, getPaintsProjectData, updatePaintsProjectValues, 
 const { getPaintsLabourData, sendPaintsLabourData, deletePaintsLabourData } = require("../../controllers/paints/paintslaboursheet");
 const { getPaintsColorData, sendPaintsColorData, updatePaintsColorData, deletePaintsColorData } = require("../../controllers/paints/paintscolorsheet");
 const { getLabourData, sendLabourData, updateLabourData, deleteLabourData } = require("../../controllers/paints/labourattendancesheet");
+const { getPaintsTermsDetails, sendPaintsTermsData, deletePaintsTermsData } = require("../../controllers/paints/paintstermsdetails");
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -289,18 +290,18 @@ app.post("/.netlify/functions/server/deleteBankData", deleteBankData);
 
 // paints bank data
 app.get("/.netlify/functions/server/getPaintsBankData", getPaintsBankDetails);
-app.post("/.netlify/functions/server/sendPaintsBankData", sendPaintsInquiryData);
-app.post("/.netlify/functions/server/updatePaintsBankData", updatePaintsInquiry);
-app.post("/.netlify/functions/server/deletePaintsBankData", deletePaintsInquiry);
+app.post("/.netlify/functions/server/sendPaintsBankData", sendPaintsBankData);
+app.post("/.netlify/functions/server/updatePaintsBankData", updatePaintsBankData);
+app.post("/.netlify/functions/server/deletePaintsBankData", deletePaintsBankData);
 
 app.get("/.netlify/functions/server/getTermsData", getTermsDetails);
 app.post("/.netlify/functions/server/sendTermsData", sendTermsData);
 app.post("/.netlify/functions/server/deleteTermsData", deleteTermsData);
 
 // paints terms details
-app.get("/.netlify/functions/server/getPaintsTermsData", getPaintsBankDetails);
-app.post("/.netlify/functions/server/sendPaintsTermsData", sendPaintsInquiryData);
-app.post("/.netlify/functions/server/deletePaintsTermsData", deletePaintsInquiry);
+app.get("/.netlify/functions/server/getPaintsTermsData", getPaintsTermsDetails);
+app.post("/.netlify/functions/server/sendPaintsTermsData", sendPaintsTermsData);
+app.post("/.netlify/functions/server/deletePaintsTermsData", deletePaintsTermsData);
 
 // paints labour details
 app.get("/.netlify/functions/server/getPaintsLabourData", getPaintsLabourData);

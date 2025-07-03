@@ -43,7 +43,7 @@ const getDesignData = async (req, res) => {
     try {
         const rows = await fetchDesignData();
         if (!rows.length) {
-            return res.status(400).json({ success: false, message: "No user data found" });
+            return res.status(200).json({ success: false, message: "No user data found" });
         }
         return res.status(200).json({ success: true, message: "Design data fetched successfully", body: rows });
     } catch (error) {

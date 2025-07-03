@@ -51,7 +51,7 @@ const sendProjectData = async (req, res) => {
 const getProjectData = async (req, res) => {
     try {
         const rows = await getAllProjectData();
-        if (!rows) return res.status(400).json({ success: false, message: "No project data available" });
+        if (!rows) return res.status(200).json({ success: false, message: "No project data available" });
         return res.status(200).json({ success: true, message: "Data Fetched", body: rows });
     } catch (error) {
         console.error("Error retrieving project data:", error);
