@@ -2,7 +2,7 @@ const { sheets } = require("../../db/googleuser")
 require("dotenv").config();
 
 const sheetId = "1J_7S0zL51yxzKXLwTwEdJgZ-qTeMLuTfmL24knmN5n8";
-const range = "Sheet1!A:B";
+const range = "Sheet1!A:C";
 
 // Utility function to fetch all interior data
 const fetchPaintsLabourData = async () => {
@@ -16,7 +16,7 @@ const fetchPaintsLabourData = async () => {
 };
 
 const updatePaintsLabourData = async (req, res) => {
-    const { name, date } = req.body;
+    const { name, date, payment } = req.body;
 
     if (!name) {
         return res.status(400).json({ success: false, message: "Title is required" });
@@ -32,12 +32,12 @@ const updatePaintsLabourData = async (req, res) => {
 
         // Keep existing values if new ones are not provided
         const updatedRow = rows[index].map((value, i) => [
-            name, date
+            name, date, payment
         ][i] ?? value);
 
         await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
-            range: `Sheet1!A${index + 1}:B${index + 1}`,
+            range: `Sheet1!A${index + 1}:C${index + 1}`,
             valueInputOption: "RAW",
             resource: { values: [updatedRow] },
         });
@@ -52,7 +52,7 @@ const updatePaintsLabourData = async (req, res) => {
 
 // Add a new interior data entry
 const sendPaintsLabourData = async (req, res) => {
-    const { name, date } = req.body;
+    const { name, date, payment } = req.body;
 
     if (![name].every(Boolean)) {
         return res.status(400).json({ success: false, message: "All fields are required" });
@@ -64,7 +64,7 @@ const sendPaintsLabourData = async (req, res) => {
             range,
             valueInputOption: "RAW",
             insertDataOption: "INSERT_ROWS",
-            requestBody: { values: [[name, date]] },
+            requestBody: { values: [[name, date, payment]] },
         });
 
         return res.status(200).json({ success: true, message: "Data sent successfully" });

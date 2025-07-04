@@ -22,31 +22,66 @@ const findRowIndex = (rows, projectName) => {
     return rows.findIndex(row => row[0] === projectName);
 };
 
-// Send Project Data (Insert)
 const sendProjectData = async (req, res) => {
-    const { projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress, date, grandTotal, discountType, bankDetails, termsConditions } = req.body;
-    
-    if(!projectName){
-      return res.status(400).json({ success : false, message : "Project name is required" });
-    }
-    
-    try {
-        await sheets.spreadsheets.values.append({
-            spreadsheetId: sheetId,
-            range: "AllProjects!A:W",
-            valueInputOption: "RAW",
-            insertDataOption: "INSERT_ROWS",
-            requestBody: {
-                values: [[projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress, date, grandTotal, discountType,  bankDetails, termsConditions ]],
-            },
-        });
+  const {
+    projectName, customerLink, projectReference, status, totalAmount, totalTax, paid,
+    discount, createdBy, allData, projectDate, additionalRequests, interiorArray,
+    salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress,
+    date, grandTotal, discountType, bankDetails, termsConditions
+  } = req.body;
 
-        return res.status(200).json({ success: true, message: "Data sent successfully" });
-    } catch (error) {
-        console.error("Error inserting project values:", error);
-        return res.status(500).json({ success: false, message: "Error inserting project data in sheets" });
-    }
+  if (!projectName) {
+    return res.status(400).json({ success: false, message: "Project name is required" });
+  }
+
+  try {
+    // Step 1: Build values array with strict length of 23 (A to W)
+    const rawValues = [
+      projectName, customerLink, projectReference, status, totalAmount, totalTax, paid,
+      discount, createdBy, allData, projectDate, additionalRequests, interiorArray,
+      salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress,
+      date, grandTotal, discountType, bankDetails, termsConditions
+    ];
+
+    const values = rawValues.map(v => {
+      if (v === undefined || v === null || v === "") return " ";
+      if (typeof v === "object") return JSON.stringify(v);
+      return v.toString();
+    });
+
+    while (values.length < 23) values.push(" ");
+
+    console.log("✅ Values Length:", values.length);  // Should always be 23
+
+    // Step 2: Get current number of rows
+    const rows = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "AllProjects!A:A",   // Only fetch column A (Project Names)
+    });
+
+    const existingRows = rows.data.values ? rows.data.values.length : 0;
+    const nextRowNumber = existingRows + 1;   // +1 because rows start at 1
+
+    console.log("✅ Writing to Row:", nextRowNumber);
+
+    // Step 3: Force update to exact A:W cells of the next row
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `AllProjects!A${nextRowNumber}:W${nextRowNumber}`,
+      valueInputOption: "RAW",
+      resource: { values: [values] },
+    });
+
+    return res.status(200).json({ success: true, message: "Data sent successfully" });
+
+  } catch (error) {
+    console.error("❌ Error inserting project values:", error);
+    return res.status(500).json({ success: false, message: "Error inserting project data in sheets" });
+  }
 };
+
+
+
 
 const getProjectData = async (req, res) => {
     try {
