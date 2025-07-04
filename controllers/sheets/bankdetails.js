@@ -2,7 +2,7 @@ const { sheets } = require("../../db/googleuser");
 require("dotenv").config();
 
 const sheetId = "1NLJjcGPKT6z7UDXuq4FlJCA2gOJCG9dp7gSAnXW0j6o";
-const range = "Sheet1!A:D";
+const range = "Sheet1!A:F";
 
 // Utility function to fetch all interior data
 const fetchBankDetailsData = async () => {
@@ -16,7 +16,7 @@ const fetchBankDetailsData = async () => {
 };
 
 const updateBankData = async (req, res) => {
-    const { customerName, accountNumber, ifscCode } = req.body;
+    const { customerName, bankName, branch, pincode, accountNumber, ifscCode } = req.body;
 
     if (!customerName) {
         return res.status(400).json({ success: false, message: "Title is required" });
@@ -32,12 +32,12 @@ const updateBankData = async (req, res) => {
 
         // Keep existing values if new ones are not provided
         const updatedRow = rows[index].map((value, i) => [
-            customerName, accountNumber, ifscCode
+            customerName, bankName, branch, pincode, accountNumber, ifscCode
         ][i] ?? value);
 
         await sheets.spreadsheets.values.update({
             spreadsheetId: sheetId,
-            range: `Sheet1!A${index + 1}:D${index + 1}`,
+            range: `Sheet1!A${index + 1}:F${index + 1}`,
             valueInputOption: "RAW",
             resource: { values: [updatedRow] },
         });
@@ -52,7 +52,7 @@ const updateBankData = async (req, res) => {
 
 // Add a new interior data entry
 const sendBankData = async (req, res) => {
-    const { customerName, accountNumber, ifscCode, date } = req.body;
+    const { customerName, bankName, branch, pincode, accountNumber, ifscCode, date } = req.body;
 
     if (![customerName, accountNumber, ifscCode, date].every(Boolean)) {
         return res.status(400).json({ success: false, message: "All fields are required" });
@@ -64,7 +64,7 @@ const sendBankData = async (req, res) => {
             range,
             valueInputOption: "RAW",
             insertDataOption: "INSERT_ROWS",
-            requestBody: { values: [[customerName, accountNumber, ifscCode, date]] },
+            requestBody: { values: [[customerName, bankName, branch, pincode, accountNumber, ifscCode, date]] },
         });
 
         return res.status(200).json({ success: true, message: "Data sent successfully" });

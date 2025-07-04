@@ -22,31 +22,61 @@ const findPaintsRowIndex = (rows, projectName) => {
     return rows.findIndex(row => row[0] === projectName);
 };
 
-// Send Project Data (Insert)
 const sendPaintsProjectData = async (req, res) => {
-    const { projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress, date, grandTotal, discountType, bankDetails, termsConditions } = req.body;
-    
-    if(!projectName){
-      return res.status(400).json({ success : false, message : "Project name is required" });
-    }
-    
-    try {
-        await sheets.spreadsheets.values.append({
-            spreadsheetId: sheetId,
-            range: "AllProjects!A:W",
-            valueInputOption: "RAW",
-            insertDataOption: "INSERT_ROWS",
-            requestBody: {
-                values: [[projectName, customerLink, projectReference, status, totalAmount, totalTax, paid, discount, createdBy, allData, projectDate, additionalRequests, interiorArray, salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress, date, grandTotal, discountType,  bankDetails, termsConditions ]],
-            },
-        });
+  const {
+    projectName, customerLink, projectReference, status, totalAmount, totalTax, paid,
+    discount, createdBy, allData, projectDate, additionalRequests, interiorArray,
+    salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress,
+    date, grandTotal, discountType, bankDetails, termsConditions
+  } = req.body;
 
-        return res.status(200).json({ success: true, message: "Data sent successfully" });
-    } catch (error) {
-        console.error("Error inserting project values:", error);
-        return res.status(500).json({ success: false, message: "Error inserting project data in sheets" });
-    }
+  if (!projectName) {
+    return res.status(400).json({ success: false, message: "Project name is required" });
+  }
+
+  try {
+    // Step 1: Prepare raw values
+    const rawValues = [
+      projectName, customerLink, projectReference, status, totalAmount, totalTax, paid,
+      discount, createdBy, allData, projectDate, additionalRequests, interiorArray,
+      salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress,
+      date, grandTotal, discountType, bankDetails, termsConditions
+    ];
+
+    // Step 2: Clean values (stringify objects, avoid empty strings)
+    const values = rawValues.map(v => {
+      if (v === undefined || v === null || v === "") return " ";
+      if (typeof v === "object") return JSON.stringify(v);
+      return v.toString();
+    });
+
+    while (values.length < 23) values.push(" ");  // Ensure exactly 23 columns (A to W)
+
+    // Step 3: Get existing number of rows
+    const existingData = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "AllProjects!A:A",  // Only check project names column
+    });
+
+    const existingRows = existingData.data.values ? existingData.data.values.length : 0;
+    const nextRowNumber = existingRows + 1;
+
+    // Step 4: Use update to write exact range A:W (no skipping)
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `AllProjects!A${nextRowNumber}:W${nextRowNumber}`,
+      valueInputOption: "RAW",
+      resource: { values: [values] },
+    });
+
+    return res.status(200).json({ success: true, message: "Data sent successfully" });
+
+  } catch (error) {
+    console.error("Error inserting project values:", error);
+    return res.status(500).json({ success: false, message: "Error inserting project data in sheets" });
+  }
 };
+
 
 const getPaintsProjectData = async (req, res) => {
     try {
