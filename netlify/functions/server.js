@@ -42,7 +42,7 @@ const { sendPaintsSalesAssociateData, getPaintsSalesAssociateData, deletePaintsS
 const { sendPaintsInteriorData, getPaintsInteriorData, deletePaintsInteriorData, updatePaintsInteriorData } = require("../../controllers/paints/paintsinteriorshe");
 const { sendPaintsCustomerData, deletePaintsCustomerData, getPaintsCustomerData, updatePaintsCustomerData } = require("../../controllers/paints/paintscustomershee");
 const { sendPaintsProjectData, getPaintsProjectData, updatePaintsProjectValues, deletePaintsProjectData, updatePaintsProjectPayment } = require("../../controllers/paints/paintsprojectsheet");
-const { getPaintsLabourData, sendPaintsLabourData, deletePaintsLabourData } = require("../../controllers/paints/paintslaboursheet");
+const { getPaintsLabourData, sendPaintsLabourData, deletePaintsLabourData, updatePaintsLabourData } = require("../../controllers/paints/paintslaboursheet");
 const { getPaintsColorData, sendPaintsColorData, updatePaintsColorData, deletePaintsColorData } = require("../../controllers/paints/paintscolorsheet");
 const { getLabourData, sendLabourData, updateLabourData, deleteLabourData } = require("../../controllers/paints/labourattendancesheet");
 const { getPaintsTermsDetails, sendPaintsTermsData, deletePaintsTermsData } = require("../../controllers/paints/paintstermsdetails");
@@ -307,6 +307,7 @@ app.post("/.netlify/functions/server/deletePaintsTermsData", deletePaintsTermsDa
 app.get("/.netlify/functions/server/getPaintsLabourData", getPaintsLabourData);
 app.post("/.netlify/functions/server/sendPaintsLabourData", sendPaintsLabourData);
 app.post("/.netlify/functions/server/deletePaintsLabourData", deletePaintsLabourData);
+app.post("/.netlify/functions/server/updatePaintsLabourData", updatePaintsLabourData);
 
 // paints color data
 app.get("/.netlify/functions/server/getPaintsColorData", getPaintsColorData);
