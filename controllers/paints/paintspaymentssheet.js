@@ -56,10 +56,10 @@ const updatePaintsPaymentData = async (req, res) => {
 
     try {
         const rows = await fetchPaintsPaymentsData();
-        const index = rows.findIndex(row => row[0] === name);
+        const index = rows.findIndex(row => row[0] === customerName);
 
         if (index === -1) {
-            return res.status(404).json({ success: false, message: `No Interior found with name: ${name}` });
+            return res.status(404).json({ success: false, message: `No Payment found with customer name: ${customerName}` });
         }
 
         // Keep existing values if new ones are not provided

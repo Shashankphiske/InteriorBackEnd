@@ -8,7 +8,7 @@ const sheetId = process.env.brandsheetid;
 const addBrand = async (req, res) => {
     const { brandName, description } = req.body;
 
-    if(!brandName || !description){
+    if(!brandName){
         return res.status(400).json({
             success : false,
             message : "All fields are required",

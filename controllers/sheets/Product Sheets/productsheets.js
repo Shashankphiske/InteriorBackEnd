@@ -8,7 +8,7 @@ const range = "IndividualProducts!A:H";
 const addNewProduct = async (req, res) => {
     const { productName, description, groupTypes, sellingUnit, mrp, taxRate, date, needsTailoring } = req.body;
 
-    if(!productName || !groupTypes || !sellingUnit || !mrp || !taxRate || !date){
+    if(!productName || !groupTypes || !sellingUnit || !mrp || !date){
         return res.status(400).json({
             success : false,
             message : "All fields are required",
