@@ -17,27 +17,39 @@ const fetchTaskData = async () => {
 
 // Add a new task
 const addTask = async (req, res) => {
-    const { title, description, dateTime, date, assigneeLink, projectLink, priority, status } = req.body;
+  const { title, description, dateTime, date, assigneeLink, projectLink, priority, status } = req.body;
 
-    if (![title, description, dateTime, date, projectLink, priority, status].every(Boolean)) {
-        return res.status(400).json({ success: false, message: "All fields are required" });
-    }
+  if (![title, description, dateTime, date, projectLink, priority, status].every(Boolean)) {
+    return res.status(400).json({ success: false, message: "All fields are required" });
+  }
 
-    try {
-        await sheets.spreadsheets.values.append({
-            spreadsheetId: sheetId,
-            range,
-            insertDataOption: "INSERT_ROWS",
-            valueInputOption: "RAW",
-            requestBody: { values: [[title, description, dateTime, date, assigneeLink, projectLink, priority, status]] },
-        });
+  try {
+    // Step 1: Read existing data to find the next available row
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range, // Example: "Tasks!A:H"
+    });
 
-        return res.status(200).json({ success: true, message: "New task added" });
-    } catch (error) {
-        console.error("Error adding task:", error);
-        return res.status(500).json({ success: false, message: "Failed to add task" });
-    }
+    const existingRows = response.data.values || [];
+    const nextRow = existingRows.length + 1;  // Header row is usually row 1
+
+    // Step 2: Update the exact row without appending
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `Tasks!A${nextRow}:H${nextRow}`,  // Write directly into the row
+      valueInputOption: "RAW",
+      resource: {
+        values: [[title, description, dateTime, date, assigneeLink, projectLink, priority, status]],
+      },
+    });
+
+    return res.status(200).json({ success: true, message: "New task added" });
+  } catch (error) {
+    console.error("Error adding task:", error);
+    return res.status(500).json({ success: false, message: "Failed to add task" });
+  }
 };
+
 
 // Delete a task by title
 const deleteTask = async (req, res) => {
