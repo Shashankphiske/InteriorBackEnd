@@ -50,13 +50,13 @@ const sendPaymentData = async (req, res) => {
 const updatePaymentData = async (req, res) => {
     const {customerName, Name, Received, ReceivedDate, PaymentMode, Remarks } = req.body;
 
-    if (!Name) {
+    if (!Name && !customerName) {
         return res.status(400).json({ success: false, message: "Title is required" });
     }
 
     try {
         const rows = await fetchPaymentsData();
-        const index = rows.findIndex(row => row[0] === customerName);
+        const index = rows.findIndex(row => row[0] === customerName && row[1] == Name);
 
         if (index === -1) {
             return res.status(404).json({ success: false, message: `No Payment found with customer name: ${customerName}` });
@@ -64,7 +64,7 @@ const updatePaymentData = async (req, res) => {
 
         // Keep existing values if new ones are not provided
         const updatedRow = rows[index].map((value, i) => [
-            Received, ReceivedDate, PaymentMode, Remarks
+            customerName, Name, Received, ReceivedDate, PaymentMode, Remarks
         ][i] ?? value);
 
         await sheets.spreadsheets.values.update({
@@ -74,7 +74,7 @@ const updatePaymentData = async (req, res) => {
             resource: { values: [updatedRow] },
         });
 
-        return res.status(200).json({ success: true, message: "Interior updated successfully" });
+        return res.status(200).json({ success: true, message: "Payment updated successfully" });
     } catch (error) {
         console.error("Error updating task:", error);
         return res.status(500).json({ success: false, message: "Internal Server Error" });
@@ -87,8 +87,8 @@ const deletePaymentData = async (req, res) => {
     try {
         const rows = await fetchPaymentsData();
         const index = rows.findIndex(row =>
-  (row[0]?.toLowerCase() === customerName?.toLowerCase()) &&
-  (row[1]?.toLowerCase() === Name?.toLowerCase()) &&
+  (row[0] === customerName) &&
+  (row[1] === Name) &&
   (row[2]?.toLowerCase() === Received?.toLowerCase()) &&
   (row[3]?.toLowerCase() === ReceivedDate?.toLowerCase()) &&
   (row[4]?.toLowerCase() === PaymentMode?.toLowerCase()) &&
