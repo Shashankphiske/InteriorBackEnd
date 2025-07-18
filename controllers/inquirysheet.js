@@ -154,7 +154,7 @@ const deleteInquiry = async (req, res) => {
             requests : [
                 {
                     deleteDimension : {
-                        range : {
+                        range : {   
                             sheetId : 0,
                             dimension : "ROWS",
                             startIndex : index,

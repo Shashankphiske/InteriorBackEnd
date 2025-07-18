@@ -32,6 +32,116 @@ const addNewProduct = async (req, res) => {
     });
 }
 
+const dayjs = require("dayjs");
+
+const updateProductsToSheet = async (req, res) => {
+try {
+const { products } = req.body;
+console.log("Received products:", products);
+
+if (!Array.isArray(products)) {
+  return res.status(400).json({ error: "Invalid request: 'products' must be an array." });
+}
+
+// Fetch current sheet data
+const response = await sheets.spreadsheets.values.get({
+  spreadsheetId: sheetId,
+  range: "IndividualProducts!A:H",
+});
+
+const rows = response.data.values || [];
+
+// Map existing product names to their row numbers
+const existingMap = {};
+rows.forEach((row, index) => {
+  const productName = row[0]?.trim();
+  if (productName) {
+    existingMap[productName] = index + 1; // Sheet rows start at 1; +1 for header
+  }
+});
+
+const updates = [];
+const inserts = [];
+
+for (const product of products) {
+  const name = product.productName?.trim();
+  const rrp = product.rrp;
+  const gst = product.gst;
+
+  if (!name || !rrp || !gst) {
+    console.warn("Skipping invalid product:", product);
+    continue;
+  }
+
+  const currentDate = dayjs().format("DD-MM-YYYY");
+  const defaultValues = [
+    name,
+    "NA",
+    "Area Based",
+    "Sq.feet",
+    rrp,
+    gst,
+    currentDate,
+    "false"
+  ];
+
+  if (existingMap[name]) {
+    const rowIndex = existingMap[name];
+    const oldRow = rows[rowIndex - 2];
+    const oldDate = oldRow[6] || currentDate;
+
+    updates.push({
+      range: `IndividualProducts!A${rowIndex}:H${rowIndex}`,
+      values: [[
+        name,
+        "NA",
+        "Area Based",
+        "Sq.feet",
+        rrp,
+        gst,
+        oldDate,
+        "false"
+      ]]
+    });
+  } else {
+    inserts.push(defaultValues);
+  }
+}
+
+console.log(`Updating ${updates.length} rows...`);
+console.log(`Appending ${inserts.length} new rows...`);
+
+// Perform batch update for existing rows
+if (updates.length > 0) {
+  await sheets.spreadsheets.values.batchUpdate({
+    spreadsheetId: sheetId,
+    requestBody: {
+      valueInputOption: "USER_ENTERED", // allows formulas, parsed numbers, etc.
+      data: updates,
+    },
+  });
+}
+
+// Append new rows
+if (inserts.length > 0) {
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: sheetId,
+    range: "IndividualProducts!A:H",
+    valueInputOption: "USER_ENTERED",
+    insertDataOption: "INSERT_ROWS",
+    requestBody: {
+      values: inserts,
+    },
+  });
+}
+
+return res.status(200).json({ message: "Sheet updated successfully." });
+} catch (err) {
+console.error("Error updating sheet:", err);
+return res.status(500).json({ error: "Failed to update sheet." });
+}
+};
+
 const addImportedProducts = async (req, res) => {
     const rows = req.body.items;
 
@@ -202,4 +312,4 @@ const getSingleProducts = async (req, res) => {
     });
 }
 
-module.exports = { addNewProduct, deleteSingleProduct, updateSingleProduct, getSingleProducts, addImportedProducts };
+module.exports = { addNewProduct, deleteSingleProduct, updateSingleProduct, getSingleProducts, addImportedProducts, updateProductsToSheet };
