@@ -66,7 +66,7 @@ const inserts = [];
 for (const product of products) {
   const name = product.productName?.trim();
   const rrp = product.rrp;
-  const gst = product.gst;
+  const gst = product.gstRate;
 
   if (!name || !rrp || !gst) {
     console.warn("Skipping invalid product:", product);
@@ -77,8 +77,8 @@ for (const product of products) {
   const defaultValues = [
     name,
     "NA",
-    "Area Based",
-    "Sq.feet",
+    "Fabric",
+    "Meter",
     rrp,
     gst,
     currentDate,
@@ -95,8 +95,8 @@ for (const product of products) {
       values: [[
         name,
         "NA",
-        "Area Based",
-        "Sq.feet",
+        "Fabric",
+        "Meter",
         rrp,
         gst,
         oldDate,
