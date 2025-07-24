@@ -18,7 +18,7 @@ const { addProductGroup, deleteProductGroup, updateProductGroup, getAllProductGr
 const { getAllStores, addStore, deleteStore, updateStores } = require("../../controllers/sheets/stores/storesheet");
 const { getAllTailors, addTailor, deleteTailor, updateTailor } = require("../../controllers/sheets/Tailor Sheets/tailorsheet");
 const { getBrands, addBrand, deleteBrand, updateBrand } = require("../../controllers/sheets/Brand Sheets/brandsheets");
-const { getCatalogues, addCatalogue, deleteCatalogue, updateCatalogue } = require("../../controllers/sheets/Catalogue Sheets/cataloguesheets");
+const { getCatalogues, addCatalogue, deleteCatalogue, updateCatalogue, addCatalogueFromTrigger } = require("../../controllers/sheets/Catalogue Sheets/cataloguesheets");
 const { getTasks, addTask, updateTask, deleteTask } = require("../../controllers/sheets/Task Sheets/tasksheet");
 const { fetchPaymentData, updatePaymentData, sendPaymentData, deletePaymentData } = require("../../controllers/sheets/paymentsheet");
 const { getAllAreas, sendAllAreas, deleteAreasData } = require("../../controllers/sheets/areas");
@@ -51,6 +51,7 @@ const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       "https://furnishkaro.netlify.app",
+      "https://sheeladecorsite.netlify.app",
       "http://localhost:5173",
       "http://51.21.200.25",
       "https://51.21.200.25",
@@ -78,6 +79,7 @@ app.use(cors(corsOptions));
 app.use((req, res, next) => {
   const allowedOrigins = [
     "https://furnishkaro.netlify.app",
+    "https://sheeladecorsite.netlify.app",
     "http://localhost:5173",
   ];
   const origin = req.headers.origin;
@@ -215,6 +217,7 @@ app.get("/.netlify/functions/server/getcatalogues", getCatalogues);
 app.post("/.netlify/functions/server/addcatalogue", addCatalogue);
 app.post("/.netlify/functions/server/deletecatalogue", deleteCatalogue);
 app.post("/.netlify/functions/server/updatecatalogue", updateCatalogue);
+app.post("/.netlify/functions/server/triggerCatalogue", addCatalogueFromTrigger);
 
 // tasks routes
 app.get("/.netlify/functions/server/gettasks", getTasks);

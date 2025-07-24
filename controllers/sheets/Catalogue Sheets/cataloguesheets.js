@@ -31,6 +31,58 @@ const addCatalogue = async (req, res) => {
     });
 }
 
+const addCatalogueFromTrigger = async (req, res) => {
+  const { catalogueName, description } = req.body;
+
+  if (!catalogueName || !description) {
+    return res.status(400).json({
+      success: false,
+      message: "All fields are required",
+    });
+  }
+
+  try {
+    // Step 1: Read all existing catalogues from the sheet
+    const readResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "Catalogues!A:A", // Adjust sheet name and range as needed
+    });
+
+    const existingCatalogues = readResponse.data.values?.flat() || [];
+
+    // Step 2: Check if the catalogue already exists
+    if (existingCatalogues.includes(catalogueName)) {
+      return res.status(200).json({
+        success: true,
+        message: "Catalogue already exists",
+      });
+    }
+
+    // Step 3: Append new catalogue
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId,
+      range: "Catalogues!A:B", // Adjust based on where you're inserting
+      insertDataOption: "INSERT_ROWS",
+      valueInputOption: "RAW",
+      requestBody: {
+        values: [[catalogueName, description]],
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Catalogue added successfully",
+    });
+
+  } catch (error) {
+    console.error("Error in addCatalogue:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 const deleteCatalogue = async (req, res) => {
     const { catalogueName } = req.body;
 
@@ -168,4 +220,4 @@ const updateCatalogue = async (req, res) => {
     });
 }
 
-module.exports = { addCatalogue, deleteCatalogue, getCatalogues, updateCatalogue };
+module.exports = { addCatalogue, deleteCatalogue, getCatalogues, updateCatalogue, addCatalogueFromTrigger };

@@ -12,7 +12,7 @@ const sheets = google.sheets({ version: "v4", auth });
 const getAllProjectData = async () => {
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: sheetId,
-        range: "AllProjects!A:W",
+        range: "AllProjects!A:X",
     });
     return response.data.values;
 };
@@ -27,7 +27,7 @@ const sendProjectData = async (req, res) => {
     projectName, customerLink, projectReference, status, totalAmount, totalTax, paid,
     discount, createdBy, allData, projectDate, additionalRequests, interiorArray,
     salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress,
-    date, grandTotal, discountType, bankDetails, termsConditions
+    date, grandTotal, discountType, bankDetails, termsConditions, defaulter
   } = req.body;
 
   if (!projectName) {
@@ -40,7 +40,7 @@ const sendProjectData = async (req, res) => {
       projectName, customerLink, projectReference, status, totalAmount, totalTax, paid,
       discount, createdBy, allData, projectDate, additionalRequests, interiorArray,
       salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress,
-      date, grandTotal, discountType, bankDetails, termsConditions
+      date, grandTotal, discountType, bankDetails, termsConditions, defaulter
     ];
 
     const values = rawValues.map(v => {
@@ -67,7 +67,7 @@ const sendProjectData = async (req, res) => {
     // Step 3: Force update to exact A:W cells of the next row
     await sheets.spreadsheets.values.update({
       spreadsheetId: sheetId,
-      range: `AllProjects!A${nextRowNumber}:W${nextRowNumber}`,
+      range: `AllProjects!A${nextRowNumber}:X${nextRowNumber}`,
       valueInputOption: "RAW",
       resource: { values: [values] },
     });
@@ -130,7 +130,8 @@ const updateProjectValues = async (req, res) => {
         grandTotal : 19,
         discountType : 20,
         bankDetails : 21,
-        termsConditions : 22
+        termsConditions : 22,
+        defaulter : 23
       };
   
       const currentRow = rows[rowIndex];
@@ -157,7 +158,7 @@ const updateProjectValues = async (req, res) => {
   
       await sheets.spreadsheets.values.update({
         spreadsheetId: sheetId,
-        range: `AllProjects!A${rowIndex + 1}:W${rowIndex + 1}`,
+        range: `AllProjects!A${rowIndex + 1}:X${rowIndex + 1}`,
         valueInputOption: "RAW",
         resource: { values: [updatedRow] },
       });
