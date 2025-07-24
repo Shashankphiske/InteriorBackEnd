@@ -80,6 +80,7 @@ app.use((req, res, next) => {
   const allowedOrigins = [
     "https://furnishkaro.netlify.app",
     "https://sheeladecorsite.netlify.app",
+    "https://sahanipaints.netlify.app",
     "http://localhost:5173",
   ];
   const origin = req.headers.origin;

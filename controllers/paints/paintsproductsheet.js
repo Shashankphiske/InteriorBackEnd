@@ -59,6 +59,7 @@ const addPaintsImportedProducts = async (req, res) => {
     });
 }
 
+
 const deletePaintsSingleProduct = async (req, res) => {
     const { productName } = req.body;
     if(!productName){
@@ -201,5 +202,7 @@ const getPaintsSingleProducts = async (req, res) => {
         body : rows,
     });
 }
+
+
 
 module.exports = { addPaintsNewProduct, deletePaintsSingleProduct, updatePaintsSingleProduct, getPaintsSingleProducts, addPaintsImportedProducts };

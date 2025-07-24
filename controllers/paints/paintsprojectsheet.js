@@ -12,13 +12,18 @@ const sheets = google.sheets({ version: "v4", auth });
 const getPaintsAllProjectData = async () => {
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: sheetId,
-        range: "AllProjects!A:W",
+        range: "AllProjects!A:X",
     });
     return response.data.values;
 };
 
+const getPaintsProjectData = async (req, res) => {
+  const response = await getPaintsAllProjectData();
+  return res.status(200).json({ body : response });
+}
+
 // Utility function to find row index by project name
-const findPaintsRowIndex = (rows, projectName) => {
+const findRowIndex = (rows, projectName) => {
     return rows.findIndex(row => row[0] === projectName);
 };
 
@@ -64,7 +69,7 @@ const sendPaintsProjectData = async (req, res) => {
     // Step 4: Use update to write exact range A:W (no skipping)
     await sheets.spreadsheets.values.update({
       spreadsheetId: sheetId,
-      range: `AllProjects!A${nextRowNumber}:W${nextRowNumber}`,
+      range: `AllProjects!A${nextRowNumber}:X${nextRowNumber}`,
       valueInputOption: "RAW",
       resource: { values: [values] },
     });
@@ -78,18 +83,6 @@ const sendPaintsProjectData = async (req, res) => {
 };
 
 
-const getPaintsProjectData = async (req, res) => {
-    try {
-        const rows = await getPaintsAllProjectData();
-        if (!rows) return res.status(200).json({ success: false, message: "No project data available" });
-        return res.status(200).json({ success: true, message: "Data Fetched", body: rows });
-    } catch (error) {
-        console.error("Error retrieving project data:", error);
-        return res.status(500).json({ success: false, message: "Error retrieving data from sheets" });
-    }
-};
-
-// Update Project Values
 const updatePaintsProjectValues = async (req, res) => {
     const { projectName, ...updatedFields } = req.body;
   
@@ -98,7 +91,7 @@ const updatePaintsProjectValues = async (req, res) => {
   
     try {
       const rows = await getPaintsAllProjectData();
-      const rowIndex = findPaintsRowIndex(rows, projectName);
+      const rowIndex = findRowIndex(rows, projectName);
       if (rowIndex === -1)
         return res.status(400).json({ success: false, message: "Project not found" });
   
@@ -125,7 +118,8 @@ const updatePaintsProjectValues = async (req, res) => {
         grandTotal : 19,
         discountType : 20,
         bankDetails : 21,
-        termsConditions : 22
+        termsConditions : 22,
+        defaulter : 23
       };
   
       const currentRow = rows[rowIndex];
@@ -152,7 +146,7 @@ const updatePaintsProjectValues = async (req, res) => {
   
       await sheets.spreadsheets.values.update({
         spreadsheetId: sheetId,
-        range: `AllProjects!A${rowIndex + 1}:W${rowIndex + 1}`,
+        range: `AllProjects!A${rowIndex + 1}:X${rowIndex + 1}`,
         valueInputOption: "RAW",
         resource: { values: [updatedRow] },
       });
@@ -172,7 +166,7 @@ const updatePaintsProjectPayment = async (req, res) => {
 
   try {
     const rows = await getPaintsAllProjectData();
-    const rowIndex = findPaintsRowIndex(rows, projectName);
+    const rowIndex = findRowIndex(rows, projectName);
     
     if (rowIndex === -1)
       return res.status(400).json({ success: false, message: "Project not found" });
@@ -201,7 +195,7 @@ const deletePaintsProjectData = async (req, res) => {
 
     try {
         const rows = await getPaintsAllProjectData();
-        const rowIndex = findPaintsRowIndex(rows, projectName);
+        const rowIndex = findRowIndex(rows, projectName);
         if (rowIndex === -1) return res.status(400).json({ success: false, message: "Project not found" });
 
         await sheets.spreadsheets.batchUpdate({
