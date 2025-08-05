@@ -1,5 +1,18 @@
 const { sheets } = require("../../db/googleuser");
+const fs = require("fs");
+const path = require("path");
 require("dotenv").config();
+
+const customerFilePath = path.join(__dirname, "../../cache/customerData.json");
+let existingData = [];
+
+try{
+    const fileData = fs.readFileSync(customerFilePath, "utf-8");
+    existingData = JSON.parse(fileData);
+}catch (Err){
+    console.log(Err);
+    return res.status(500).json({ message : "JSON error" });
+}
 
 const sheetId = process.env.customerSheetId;
 const range = "CustomerData!A:H";
@@ -28,6 +41,29 @@ const sendCustomerData = async (req, res) => {
     if (![name, phonenumber, address].every(Boolean)) {
         return res.status(400).json({ success: false, message: "All fields are required" });
     }
+
+    let newCustomer = {
+        "name" : "NA",
+        "phonenumber" : "00",
+        "email" : "NA",
+        "address" : "NA",
+        "alternatenumber" : "00",
+        "addedDate" : "NA",
+        "companyName" : "NA",
+        "GST" : "NA"
+    }
+
+    newCustomer.name = (name != null ? name : "NA");
+    newCustomer.phonenumber = (phonenumber != null ? phonenumber : "NA");
+    newCustomer.email = (email != null ? email : "NA");
+    newCustomer.address = (address != null ? address : "NA");
+    newCustomer.alternatenumber = (alternatenumber != null ? alternatenumber : "NA");
+    newCustomer.addedDate = (addedDate != null ? addedDate : "NA");
+    newCustomer.companyName = (companyName != null ? companyName : "NA");
+    newCustomer.GST = (GST != null ? GST : "NA");
+
+    existingData.push(newCustomer);
+    fs.writeFileSync(customerFilePath, JSON.stringify(existingData, null, 2), "utf-8");
 
     try {
         const srno = (await getCustomerSerial()) + 1;
