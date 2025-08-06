@@ -1,5 +1,6 @@
 const { sheets } = require("../db/googleuser");
 require("dotenv").config;
+const inquiryData = require("../models/inquiryModels");
 
 const sheetId = "1G98mY1kooSP4ouckUg0uye0IoAOw6e63Almt6wt55d0";
 const range = "Sheet1!A:G";
@@ -26,6 +27,16 @@ const sendInquiryData = async (req, res) => {
     if (![projectName].every(Boolean)) {
         return res.status(400).json({ success: false, message: "All fields are required" });
     }
+
+    await inquiryData.create({
+        projectName,
+        phonenumber,
+        comment,
+        inquiryDate,
+        projectDate,
+        status,
+        customer
+    });
 
     try {
         await sheets.spreadsheets.values.append({
