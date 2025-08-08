@@ -232,7 +232,7 @@ const deleteSingleProduct = async (req, res) => {
 }
 
 const updateSingleProduct = async (req, res) => {
-    const { productName, description, groupTypes, sellingUnit, mrp, taxRate, date, needsTailoring }=req.body;
+    const { oldProductName, productName, description, groupTypes, sellingUnit, mrp, taxRate, date, needsTailoring }=req.body;
 
     if(!productName){
         return res.status(400).json({
@@ -259,7 +259,7 @@ const updateSingleProduct = async (req, res) => {
     let rowindex = -1;
 
     for(let i = 0; i < rows.length; i++){
-        if(rows[i][0] == productName){
+        if(rows[i][0] == oldProductName){
             row = rows[i];
             rowindex = i + 1;
             break;
@@ -269,12 +269,12 @@ const updateSingleProduct = async (req, res) => {
     if(row == -1 || rowindex == -1){
         return res.status(400).json({
             success : false,
-            message : `No product with the name : ${productName} found`,
+            message : `No product with the name : ${oldProductName} found`,
         });
     }
 
     const updatedrow = [
-        productName,
+        productName ?? row[0],
         description ?? row[1],
         groupTypes ?? row[2],
         sellingUnit ?? row[3],
