@@ -98,9 +98,9 @@ const deleteProductGroup = async (req, res) => {
 }
 
 const updateProductGroup = async (req, res) => {
-    const { groupName, mainProducts, addonProducts, status } = req.body;
+    const { oldName, groupName, mainProducts, addonProducts, status } = req.body;
 
-    if(!groupName){
+    if(!oldName){
         return res.status(400).json({
             success : false,
             message : "Group name required",
@@ -125,7 +125,7 @@ const updateProductGroup = async (req, res) => {
     let row = -1;
 
     for(let i = 0; i < rows.length; i++){
-        if(rows[i][0] == groupName){
+        if(rows[i][0] == oldName){
             index = i + 1;
             row = rows[i];
             break;
@@ -135,12 +135,12 @@ const updateProductGroup = async (req, res) => {
     if(index == -1){
         return res.status(400).json({
             success : false,
-            message : `No product group with the name ${groupName} found`,
+            message : `No product group with the name ${oldName} found`,
         })
     }
 
     const newrow = [
-        groupName,
+        groupName ?? row[0],
         mainProducts ?? row[1],
         addonProducts ?? row[2],
         status ?? row[3]
