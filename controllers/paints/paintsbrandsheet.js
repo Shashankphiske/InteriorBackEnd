@@ -108,9 +108,9 @@ const getPaintsBrands = async (req, res) => {
 }
 
 const updatePaintsBrand = async (req, res) => {
-    const { brandName, description } = req.body;
+    const { oldName, brandName, description } = req.body;
 
-    if(!brandName){
+    if(!oldName){
         return res.status(400).json({
             success : false,
             message : "Brand name is required",
@@ -134,7 +134,7 @@ const updatePaintsBrand = async (req, res) => {
     let row = -1;
     let index = -1;
     for(let i = 0; i < rows.length; i++){
-        if(rows[i][0] == brandName){
+        if(rows[i][0] == oldName){
             index = i + 1;
             row = rows[i];
             break;
@@ -144,12 +144,12 @@ const updatePaintsBrand = async (req, res) => {
     if(index == -1){
         return res.status(400).json({
             success : false,
-            message : `No brand with the name ${brandName} found`,
+            message : `No brand with the name ${oldName} found`,
         });
     }
 
     const newrow = [
-        brandName,
+        brandName ?? row[0],
         description ?? row[1],
     ];
 

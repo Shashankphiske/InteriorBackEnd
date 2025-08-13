@@ -28,16 +28,6 @@ const sendInquiryData = async (req, res) => {
         return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
-    await inquiryData.create({
-        projectName,
-        phonenumber,
-        comment,
-        inquiryDate,
-        projectDate,
-        status,
-        customer
-    });
-
     try {
         await sheets.spreadsheets.values.append({
             spreadsheetId: sheetId,
