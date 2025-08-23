@@ -127,11 +127,11 @@ const updatePaintsCustomerData = async (req, res) => {
             name,
             phonenumber ?? data[index][1],
             email ?? data[index][2],
-            address ?? data[index][2],
-            alternatenumber ?? data[index][3],
-            addedDate ?? data[index][4],
-            companyName ?? data[index][5],
-            GST ?? data[index][6]
+            address ?? data[index][3],
+            alternatenumber ?? data[index][4],
+            addedDate ?? data[index][5],
+            companyName ?? data[index][6],
+            GST ?? data[index][7]
         ];
 
         await sheets.spreadsheets.values.update({

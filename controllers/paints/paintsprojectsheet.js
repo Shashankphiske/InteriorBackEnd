@@ -32,7 +32,7 @@ const sendPaintsProjectData = async (req, res) => {
     projectName, customerLink, projectReference, status, totalAmount, totalTax, paid,
     discount, createdBy, allData, projectDate, additionalRequests, interiorArray,
     salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress,
-    date, grandTotal, discountType, bankDetails, termsConditions
+    date, grandTotal, discountType, bankDetails, termsConditions, defaulter
   } = req.body;
 
   if (!projectName) {
@@ -45,7 +45,7 @@ const sendPaintsProjectData = async (req, res) => {
       projectName, customerLink, projectReference, status, totalAmount, totalTax, paid,
       discount, createdBy, allData, projectDate, additionalRequests, interiorArray,
       salesAssociateArray, additionalItems, goodsArray, tailorsArray, projectAddress,
-      date, grandTotal, discountType, bankDetails, termsConditions
+      date, grandTotal, discountType, bankDetails, termsConditions, defaulter
     ];
 
     // Step 2: Clean values (stringify objects, avoid empty strings)
